@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.DS_Store
+*.log
+.env
+.vercel
+out
+dist
+build
+coverage
+.vscode
+.idea
+*.md
