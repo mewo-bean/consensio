@@ -14,12 +14,12 @@ datasource db {
 
 model User {
   id               Int                   @id @default(autoincrement())
-  first_name       String                @db.VarChar(20)
-  last_name        String                @db.VarChar(20)
+  first_name       String?                @db.VarChar(20) //пока сделал необязательными, надо обсудить
+  last_name        String?                @db.VarChar(20)
   username         String                @unique @db.VarChar(50)
   email            String                @unique @db.VarChar(255)
   password_hash    String                @db.VarChar(255)
-  salt             String                @db.VarChar(255)
+  //salt             String                @db.VarChar(255)
   tg_id            Int?
   survey_results   SurveyResult[]
   complaints_from  Complaint[]           @relation("from_user")
