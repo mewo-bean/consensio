@@ -54,20 +54,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         signIn: "/login"
     },
     callbacks: {
-        jwt({ token, user}) {
+        async jwt({ token, user}) {
             if (user) {
-                token.id = user.id
+                const userRole = await prisma.userTeam.findFirst({
+                    where: { user_id: parseInt(user.id) }
+                });
+                token.role = userRole?.role || "member";
+                token.id = user.id;
                 token.email = user.email
                 token.name = user.email
             }
 
             return token
         },
-        session({ session, token}) {
+        async session({ session, token}) {
             if (session.user) {
                 session.user.id = token.id as string
                 session.user.email = token.email as string
                 session.user.username = token.name
+                session.user.role = token.role as string;
             }
 
             return session;

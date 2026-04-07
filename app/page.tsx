@@ -1,9 +1,14 @@
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        HEllo
-      </main>
-    </div>
-  );
+import { auth } from "@/auth"
+import { Guest } from "@/components/guest"
+import UserClient from "./user_client"
+
+export default async function Page() {
+    // Проверка сессии на сервере (мгновенно и надежно)
+    const session = await auth()
+
+    if (!session) {
+        return <Guest />
+    }
+
+    return <UserClient user={session.user} />
 }
