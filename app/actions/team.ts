@@ -154,3 +154,51 @@ export async function deleteTeam(teamId: number) {
 
   redirect("/dashboard");
 }
+
+export async function leaveTeam(teamId: number) {
+  const user = await getCurrentUser();
+  if (!user) return { error: "Не авторизован" };
+
+  try {
+    const membership = await prisma.userTeam.findUnique({
+      where: {
+        user_id_team_id: { user_id: user.id, team_id: teamId },
+      },
+    });
+
+    if (!membership) return { error: "Вы не состоите в этой команде" };
+
+    // если пользователь — админ, проверяем, не единственный ли он
+    if (membership.role === "manager") {
+      const managersCount = await prisma.userTeam.count({
+        where: {
+          team_id: teamId,
+          role: "manager",
+        },
+      });
+
+      // если он один — запрещаем выход
+      if (managersCount <= 1) {
+        return {
+          error:
+            "Вы единственный администратор! Назначьте админом кого-нибудь еще перед выходом или удалите команду целиком.",
+        };
+      }
+    }
+
+    // если всё в порядке (он обычный участник или админов несколько) — удаляем
+    await prisma.userTeam.delete({
+      where: {
+        user_id_team_id: { user_id: user.id, team_id: teamId },
+      },
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/teams");
+  } catch (error) {
+    console.error("Ошибка при выходе из команды:", error);
+    return { error: "Не удалось покинуть команду" };
+  }
+
+  redirect("/dashboard");
+}

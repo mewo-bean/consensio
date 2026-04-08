@@ -8,9 +8,8 @@ export function CopyInviteButton({ teamId }: { teamId: number }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
-    // Формируем ссылку на страницу вступления
-    const inviteLink = `${window.location.origin}/dashboard/teams/new`;
-    const textToCopy = `Присоединяйся к моей команде в consensio!\nСсылка: ${inviteLink}\nID команды: ${teamId}`;
+    const inviteLink = `${window.location.origin}/dashboard/invite/${teamId}`;
+    const textToCopy = `Присоединяйся к моей команде в consensio!\nСсылка: ${inviteLink}\n(Или введи ID вручную: ${teamId})`;
 
     await navigator.clipboard.writeText(textToCopy);
     setCopied(true);
@@ -29,7 +28,7 @@ export function CopyInviteButton({ teamId }: { teamId: number }) {
         </>
       ) : (
         <>
-          <Copy className="size-3" /> Копировать ссылку и ID
+          <Copy className="size-3" /> Копировать инвайт
         </>
       )}
     </Button>
