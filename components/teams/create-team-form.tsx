@@ -38,7 +38,7 @@ export function CreateTeamForm({
           <Users className="size-5 text-primary" />
           Создать команду
         </CardTitle>
-        <CardDescription className="min-h-[40px]">
+        <CardDescription className="min-h-[80px] text-balance">
           Вы автоматически станете её администратором и сможете приглашать
           коллег.
         </CardDescription>

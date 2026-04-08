@@ -38,7 +38,7 @@ export function JoinTeamForm({
           <UserPlus className="size-5 text-muted-foreground" />
           Присоединиться
         </CardTitle>
-        <CardDescription className="min-h-[40px]">
+        <CardDescription className="min-h-[80px] text-balance">
           Введите уникальный ID команды, который вам передал менеджер.
         </CardDescription>
       </CardHeader>
