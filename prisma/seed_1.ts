@@ -37,10 +37,10 @@ async function main() {
         data: {
             username: 'chief_admin',
             email: 'ceo@wellness.io',
-            first_name: 'Алексей',
-            last_name: 'Менеджеров',
-            password_hash: hashedPassword,
-            notification_settings: { create: { notify_via_tg: true, notify_via_web: true } }
+            firstName: 'Алексей',
+            lastName: 'Менеджеров',
+            passwordHash: hashedPassword,
+            notificationSettings: { create: { notifyViaTg: true, notifyViaWeb: true } }
         }
     });
 
@@ -53,7 +53,7 @@ async function main() {
     for (const t of teamsData) {
         const team = await prisma.team.create({ data: { title: t.title } });
         createdTeams.push(team);
-        await prisma.userTeam.create({ data: { user_id: manager.id, team_id: team.id, role: Role.manager } });
+        await prisma.userTeam.create({ data: { userId: manager.id, teamId: team.id, role: Role.manager } });
     }
 
     const allEmployees = [];
@@ -63,13 +63,13 @@ async function main() {
                 data: {
                     username: `${team.title.split(' ')[0].toLowerCase()}_user_${i}`,
                     email: `${team.title.split(' ')[0].toLowerCase()}_${i}@wellness.io`,
-                    first_name: 'Сотрудник',
-                    last_name: `${i}`,
-                    password_hash: hashedPassword,
-                    notification_settings: { create: { notify_via_web: true } }
+                    firstName: 'Сотрудник',
+                    lastName: `${i}`,
+                    passwordHash: hashedPassword,
+                    notificationSettings: { create: { notifyViaWeb: true } }
                 }
             });
-            await prisma.userTeam.create({ data: { user_id: user.id, team_id: team.id, role: Role.member } });
+            await prisma.userTeam.create({ data: { userId: user.id, teamId: team.id, role: Role.member } });
             allEmployees.push({ ...user, teamId: team.id });
         }
     }
@@ -79,8 +79,8 @@ async function main() {
 
     // PSS-14
     const pssSurvey = await prisma.sampleSurvey.create({ data: { title: 'Шкала воспринимаемого стресса (PSS-14)' } });
-    const stressScale = await prisma.subscale.create({ data: { title: 'Стресс', top_mean: 45, bottom_mean: 15 } });
-    const pssChoices = ['Никогда', 'Почти никогда', 'Иногда', 'Довольно часто', 'Очень часто'].map((c, i) => ({ content: c, order_num: i }));
+    const stressScale = await prisma.subscale.create({ data: { title: 'Стресс', topMean: 45, bottomMean: 15 } });
+    const pssChoices = ['Никогда', 'Почти никогда', 'Иногда', 'Довольно часто', 'Очень часто'].map((c, i) => ({ content: c, orderNum: i }));
     const pssQuestions = [
         "Как часто за последний месяц Вы испытывали расстройство из-за того, что произошло неожиданно?",
         "Как часто за последний месяц Вы чувствовали, что не в состоянии контролировать важные вещи в вашей жизни?",
@@ -99,14 +99,14 @@ async function main() {
     ];
     for (const q of pssQuestions) {
         await prisma.question.create({
-            data: { survey_id: pssSurvey.id, choices: { create: pssChoices }, subscales: { create: { subscale_id: stressScale.id } } }
+            data: { surveyId: pssSurvey.id, choices: { create: pssChoices }, subscales: { create: { subscaleId: stressScale.id } } }
         });
     }
 
     // Gallup Q12
     const gallupSurvey = await prisma.sampleSurvey.create({ data: { title: 'Опрос Gallup Q12' } });
-    const engageScale = await prisma.subscale.create({ data: { title: 'Вовлеченность', top_mean: 55, bottom_mean: 30 } });
-    const gallupChoices = ['Полностью не согласен', 'Не согласен', 'Нейтрально', 'Согласен', 'Полностью согласен'].map((c, i) => ({ content: c, order_num: i + 1 }));
+    const engageScale = await prisma.subscale.create({ data: { title: 'Вовлеченность', topMean: 55, bottomMean: 30 } });
+    const gallupChoices = ['Полностью не согласен', 'Не согласен', 'Нейтрально', 'Согласен', 'Полностью согласен'].map((c, i) => ({ content: c, orderNum: i + 1 }));
     const gallupQuestions = [
         "Я знаю, что от меня требуется в работе.",
         "У меня есть все необходимое для работы.",
@@ -123,7 +123,7 @@ async function main() {
     ];
     for (const q of gallupQuestions) {
         await prisma.question.create({
-            data: { survey_id: gallupSurvey.id, choices: { create: gallupChoices }, subscales: { create: { subscale_id: engageScale.id } } }
+            data: { surveyId: gallupSurvey.id, choices: { create: gallupChoices }, subscales: { create: { subscaleId: engageScale.id } } }
         });
     }
 
@@ -140,10 +140,10 @@ async function main() {
 
             // Создаем два запуска опроса для каждой команды в эту неделю
             const pssTeamSurvey = await prisma.teamSurvey.create({
-                data: { team_id: team.id, sample_survey_id: pssSurvey.id, created_at: date }
+                data: { teamId: team.id, sampleSurveyId: pssSurvey.id, createdAt: date }
             });
             const gallupTeamSurvey = await prisma.teamSurvey.create({
-                data: { team_id: team.id, sample_survey_id: gallupSurvey.id, created_at: date }
+                data: { teamId: team.id, sampleSurveyId: gallupSurvey.id, createdAt: date }
             });
 
             for (const emp of teamEmployees) {
@@ -152,37 +152,37 @@ async function main() {
 
                 // --- Данные PSS-14 ---
                 // Имитация: во Frontend стресс растет к текущему моменту (week=0), в Backend стабилен
-                let baseStress = team.title.includes('Frontend')
+                const baseStress = team.title.includes('Frontend')
                     ? 38 - (week * 2)
                     : 22 + Math.floor(Math.random() * 5);
                 const pssScore = Math.max(5, Math.min(baseStress + Math.floor(Math.random() * 8), 56));
 
                 await prisma.surveyResult.create({
                     data: {
-                        user_id: emp.id,
-                        team_survey_id: pssTeamSurvey.id,
-                        sample_survey_id: pssSurvey.id,
-                        sent_at: date,
-                        total_score: pssScore,
-                        is_anon: true,
-                        scores: { create: { subscale_id: stressScale.id, score: pssScore } }
+                        userId: emp.id,
+                        teamSurveyId: pssTeamSurvey.id,
+                        sampleSurveyId: pssSurvey.id,
+                        sentAt: date,
+                        totalScore: pssScore,
+                        isAnon: true,
+                        scores: { create: { subscaleId: stressScale.id, score: pssScore } }
                     }
                 });
 
                 // --- Данные Gallup Q12 ---
                 // Имитация: вовлеченность падает, если стресс высокий
-                let baseEngage = 55 - (pssScore / 3);
+                const baseEngage = 55 - (pssScore / 3);
                 const gallupScore = Math.max(12, Math.min(Math.floor(baseEngage + Math.random() * 10), 60));
 
                 await prisma.surveyResult.create({
                     data: {
-                        user_id: emp.id,
-                        team_survey_id: gallupTeamSurvey.id,
-                        sample_survey_id: gallupSurvey.id,
-                        sent_at: date,
-                        total_score: gallupScore,
-                        is_anon: false, // Gallup обычно не анонимный
-                        scores: { create: { subscale_id: engageScale.id, score: gallupScore } }
+                        userId: emp.id,
+                        teamSurveyId: gallupTeamSurvey.id,
+                        sampleSurveyId: gallupSurvey.id,
+                        sentAt: date,
+                        totalScore: gallupScore,
+                        isAnon: false, // Gallup обычно не анонимный
+                        scores: { create: { subscaleId: engageScale.id, score: gallupScore } }
                     }
                 });
             }
@@ -192,11 +192,11 @@ async function main() {
     // 5. Жалобы
     await prisma.complaint.create({
         data: {
-            from_user_id: allEmployees[0].id,
-            to_user_id: manager.id,
-            team_id: createdTeams[0].id,
+            fromUserId: allEmployees[0].id,
+            toUserId: manager.id,
+            teamId: createdTeams[0].id,
             content: "На этой неделе было слишком много митингов, не успеваем задачи.",
-            is_anon: true
+            isAnon: true
         }
     });
 

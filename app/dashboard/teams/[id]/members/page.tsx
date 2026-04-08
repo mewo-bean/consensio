@@ -33,7 +33,7 @@ export default async function TeamPage({
 
   if (!team) redirect("/dashboard");
 
-  const currentUserMembership = team.members.find((m) => m.user_id === user.id);
+  const currentUserMembership = team.members.find((m) => m.userId === user.id);
   if (!currentUserMembership) redirect("/dashboard");
   const isManager = currentUserMembership.role === "manager";
 
@@ -76,7 +76,7 @@ export default async function TeamPage({
           <CardContent className="space-y-4">
             {team.members.map((member) => (
               <div
-                key={member.user_id}
+                key={member.userId}
                 className="flex items-center justify-between p-3 border rounded-lg"
               >
                 <div className="flex items-center gap-3">
@@ -87,8 +87,8 @@ export default async function TeamPage({
                   )}
                   <div>
                     <div className="font-medium text-sm">
-                      {member.user.first_name || member.user.username}
-                      {member.user_id === user.id && " (Вы)"}
+                      {member.user.firstName || member.user.username}
+                      {member.userId === user.id && " (Вы)"}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {member.user.email}
@@ -106,10 +106,10 @@ export default async function TeamPage({
                   </Badge>
 
                   {/* Кнопки управления только для админов и не для себя */}
-                  {isManager && member.user_id !== user.id && (
+                  {isManager && member.userId !== user.id && (
                     <MemberActions
                       teamId={teamId}
-                      userId={member.user_id}
+                      userId={member.userId}
                       currentRole={member.role}
                     />
                   )}

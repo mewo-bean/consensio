@@ -37,9 +37,9 @@ async function main() {
         data: {
             username: 'chief_admin',
             email: 'ceo@wellness.io',
-            first_name: 'Алексей',
-            last_name: 'Менеджеров',
-            password_hash: hashedPassword,
+            firstName: 'Алексей',
+            lastName: 'Менеджеров',
+            passwordHash: hashedPassword,
         }
     });
 
@@ -48,8 +48,8 @@ async function main() {
 
     await prisma.userTeam.createMany({
         data: [
-            { user_id: manager.id, team_id: frontendTeam.id, role: Role.manager },
-            { user_id: manager.id, team_id: backendTeam.id, role: Role.manager },
+            { userId: manager.id, teamId: frontendTeam.id, role: Role.manager },
+            { userId: manager.id, teamId: backendTeam.id, role: Role.manager },
         ]
     });
 
@@ -61,10 +61,10 @@ async function main() {
             data: {
                 username: `worker_${i}`,
                 email: `worker_${i}@wellness.io`,
-                password_hash: hashedPassword,
+                passwordHash: hashedPassword,
             }
         });
-        await prisma.userTeam.create({ data: { user_id: user.id, team_id: teamId, role: Role.member } });
+        await prisma.userTeam.create({ data: { userId: user.id, teamId: teamId, role: Role.member } });
         allEmployees.push({ id: user.id, teamId });
     }
 
@@ -81,10 +81,10 @@ async function main() {
         reportDate.setDate(now.getDate() - (week * 7));
 
         // Создаем запуски опросов
-        const fvPss = await prisma.teamSurvey.create({ data: { team_id: frontendTeam.id, sample_survey_id: pssSurvey.id, created_at: reportDate } });
-        const fvGal = await prisma.teamSurvey.create({ data: { team_id: frontendTeam.id, sample_survey_id: gallupSurvey.id, created_at: reportDate } });
-        const bvPss = await prisma.teamSurvey.create({ data: { team_id: backendTeam.id, sample_survey_id: pssSurvey.id, created_at: reportDate } });
-        const bvGal = await prisma.teamSurvey.create({ data: { team_id: backendTeam.id, sample_survey_id: gallupSurvey.id, created_at: reportDate } });
+        const fvPss = await prisma.teamSurvey.create({ data: { teamId: frontendTeam.id, sampleSurveyId: pssSurvey.id, createdAt: reportDate } });
+        const fvGal = await prisma.teamSurvey.create({ data: { teamId: frontendTeam.id, sampleSurveyId: gallupSurvey.id, createdAt: reportDate } });
+        const bvPss = await prisma.teamSurvey.create({ data: { teamId: backendTeam.id, sampleSurveyId: pssSurvey.id, createdAt: reportDate } });
+        const bvGal = await prisma.teamSurvey.create({ data: { teamId: backendTeam.id, sampleSurveyId: gallupSurvey.id, createdAt: reportDate } });
 
         const weeklySurveys = [fvPss, fvGal, bvPss, bvGal];
 
@@ -116,24 +116,24 @@ async function main() {
             // Записываем PSS-14
             await prisma.surveyResult.create({
                 data: {
-                    user_id: emp.id,
-                    team_survey_id: isFrontend ? fvPss.id : bvPss.id,
-                    sample_survey_id: pssSurvey.id,
-                    sent_at: reportDate,
-                    total_score: Math.floor(stressScore),
-                    is_anon: true,
+                    userId: emp.id,
+                    teamSurveyId: isFrontend ? fvPss.id : bvPss.id,
+                    sampleSurveyId: pssSurvey.id,
+                    sentAt: reportDate,
+                    totalScore: Math.floor(stressScore),
+                    isAnon: true,
                 }
             });
 
             // Записываем Gallup
             await prisma.surveyResult.create({
                 data: {
-                    user_id: emp.id,
-                    team_survey_id: isFrontend ? fvGal.id : bvGal.id,
-                    sample_survey_id: gallupSurvey.id,
-                    sent_at: reportDate,
-                    total_score: Math.floor(engageScore),
-                    is_anon: false,
+                    userId: emp.id,
+                    teamSurveyId: isFrontend ? fvGal.id : bvGal.id,
+                    sampleSurveyId: gallupSurvey.id,
+                    sentAt: reportDate,
+                    totalScore: Math.floor(engageScore),
+                    isAnon: false,
                 }
             });
         }

@@ -55,7 +55,7 @@ export default async function InvitePage({
   }
 
   // 2. Проверяем, состоит ли пользователь уже в этой команде
-  const isAlreadyMember = team.members.some((m) => m.user_id === user.id);
+  const isAlreadyMember = team.members.some((m) => m.userId === user.id);
 
   // 3. Серверный экшен для мгновенного вступления
   async function acceptInvite() {
@@ -66,8 +66,8 @@ export default async function InvitePage({
     try {
       await prisma.userTeam.create({
         data: {
-          user_id: currentUser.id,
-          team_id: teamId,
+          userId: currentUser.id,
+          teamId: teamId,
           role: "member",
         },
       });

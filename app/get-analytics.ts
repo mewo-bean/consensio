@@ -13,12 +13,12 @@ export async function getAnalytics(days: number = 90) {
 
     const results = await prisma.surveyResult.findMany({
         where: {
-            sent_at: { gte: startDate },
+            sentAt: { gte: startDate },
         },
         include: {
-            sample_survey: { select: { title: true } }
+            sampleSurvey: { select: { title: true } }
         },
-        orderBy: { sent_at: 'asc' }
+        orderBy: { sentAt: 'asc' }
     })
 
     // Группировка через Map для чистого кода
@@ -26,17 +26,17 @@ export async function getAnalytics(days: number = 90) {
 
     results.forEach(res => {
         // Получаем ключ в формате ГГГГ-ММ-ДД
-        const dateKey = res.sent_at.toISOString().split('T')[0];
+        const dateKey = res.sentAt.toISOString().split('T')[0];
 
         if (!dataMap.has(dateKey)) {
             dataMap.set(dateKey, { stress: [], engagement: [] })
         }
 
         const entry = dataMap.get(dateKey)!
-        if (res.sample_survey.title.includes("PSS-14")) {
-            entry.stress.push(res.total_score)
-        } else if (res.sample_survey.title.includes("Gallup")) {
-            entry.engagement.push(res.total_score)
+        if (res.sampleSurvey.title.includes("PSS-14")) {
+            entry.stress.push(res.totalScore)
+        } else if (res.sampleSurvey.title.includes("Gallup")) {
+            entry.engagement.push(res.totalScore)
         }
     })
 

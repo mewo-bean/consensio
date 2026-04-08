@@ -1,8 +1,8 @@
 self.addEventListener('push', (event) => {
-    const data = event.data?.json() ?? { title: 'Уведомление', body: '' };
+    const data = event.data?.json() ?? { title: 'Уведомление', body: '', url: '/' };
     const options = {
         body: data.body,
-        icon: data.icon,
+        icon: '/icon-192.png',
         badge: '/badge.png',
         data: { url: data.url || '/' }
     };

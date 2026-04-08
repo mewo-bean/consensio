@@ -13,7 +13,7 @@ export default async function DashboardLayout({
   if (!user) redirect("/login");
 
   const userTeams = await prisma.userTeam.findMany({
-    where: { user_id: user.id },
+    where: { userId: user.id },
     include: { team: true },
   });
 
