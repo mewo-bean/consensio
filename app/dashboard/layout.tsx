@@ -11,22 +11,21 @@ export default async function DashboardLayout({
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  // Получаем команды пользователя через промежуточную таблицу UserTeam
   const userTeams = await prisma.userTeam.findMany({
     where: { user_id: user.id },
     include: { team: true },
   });
 
-  // Проверяем, является ли пользователь менеджером хотя бы в одной команде
-  const isManager = userTeams.some((ut) => ut.role === "manager");
-
-  // Мапим результат для пропсов сайдбара
-  const teams = userTeams.map((ut) => ut.team);
+  const teams = userTeams.map((ut) => ({
+    id: ut.team.id,
+    title: ut.team.title,
+    role: ut.role,
+  }));
 
   return (
-    <div className="flex min-h-screen bg-muted/20">
-      <Sidebar isManager={isManager} teams={teams} />
-      <main className="flex-1 p-8">{children}</main>
+    <div className="flex min-h-screen">
+      <Sidebar teams={teams} />
+      <main className="flex-1 overflow-y-auto bg-muted/10">{children}</main>
     </div>
   );
 }
