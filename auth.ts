@@ -31,11 +31,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     where: { email: credentials.email }
                 })
 
-                if (!user?.password_hash) {
+                if (!user?.passwordHash) {
                     return null
                 }
 
-                const valid = await bcrypt.compare(credentials.password, user.password_hash)
+                const valid = await bcrypt.compare(credentials.password, user.passwordHash)
 
                 if (!valid) {
                     return null

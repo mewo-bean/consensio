@@ -66,7 +66,7 @@ export async function signupAction(
         data: {
             email,
             username: username,
-            password_hash: hashedPassword,
+            passwordHash: hashedPassword,
         }
     })
 
