@@ -2,6 +2,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { SidebarProvider } from "@/components/ui/sidebar"; // Добавляем импорт
 
 export default async function DashboardLayout({
   children,
@@ -23,9 +24,11 @@ export default async function DashboardLayout({
   }));
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar teams={teams} />
-      <main className="flex-1 overflow-y-auto bg-muted/10">{children}</main>
-    </div>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full">
+        <Sidebar teams={teams} />
+        <main className="flex-1 overflow-y-auto bg-muted/10">{children}</main>
+      </div>
+    </SidebarProvider>
   );
 }

@@ -38,7 +38,7 @@ export default async function TeamPage({
   const isManager = currentUserMembership.role === "manager";
 
   return (
-    <div className="flex-1 space-y-6 max-w-5xl mx-auto pt-6">
+    <div className="flex-1 space-y-6 w-full pt-6 px-4 lg:px-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">{team.title}</h1>
         <div className="flex items-center gap-3">

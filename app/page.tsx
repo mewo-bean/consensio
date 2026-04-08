@@ -1,14 +1,13 @@
-import { auth } from "@/auth"
-import { Guest } from "@/components/guest"
-import UserClient from "./user_client"
+import { auth } from "@/auth";
+import { Guest } from "@/components/guest";
+import { redirect } from "next/navigation";
 
 export default async function Page() {
-    // Проверка сессии на сервере (мгновенно и надежно)
-    const session = await auth()
+  const session = await auth();
 
-    if (!session) {
-        return <Guest />
-    }
+  if (!session?.user) {
+    return <Guest />;
+  }
 
-    return <UserClient user={session.user} />
+  redirect("/dashboard");
 }
