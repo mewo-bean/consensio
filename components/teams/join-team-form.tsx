@@ -51,12 +51,12 @@ export function JoinTeamForm({
         <CardContent className="pb-6">
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="inviteId">Инвайт-код (ID)</FieldLabel>
+              <FieldLabel htmlFor="inviteId">ID команды</FieldLabel>
               <Input
                 id="inviteId"
                 name="inviteId"
                 type="text"
-                placeholder="Например: 12"
+                placeholder="Например: 123456"
                 required
                 className="bg-muted/40 focus-visible:bg-transparent transition-colors"
               />
