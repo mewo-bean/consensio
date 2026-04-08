@@ -176,7 +176,7 @@ model UserTeam {
   team_id   Int
   role      Role
   user      User     @relation(fields: [user_id], references: [id])
-  team      Team     @relation(fields: [team_id], references: [id])
+  team      Team     @relation(fields: [team_id], references: [id], onDelete: Cascade)
 
   @@id([user_id, team_id])
   @@map("user_teams")
