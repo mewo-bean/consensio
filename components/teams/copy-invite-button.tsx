@@ -19,16 +19,16 @@ export function CopyInviteButton({ teamId }: { teamId: number }) {
   return (
     <Button
       variant="outline"
-      className="w-full gap-2 text-xs"
+      className="w-full gap-2 text-sm whitespace-normal h-auto py-2.5 sm:py-2 text-balance"
       onClick={handleCopy}
     >
       {copied ? (
         <>
-          <Check className="size-3 text-green-500" /> Скопировано!
+          <Check className="size-4 text-green-500 shrink-0" /> Скопировано!
         </>
       ) : (
         <>
-          <Copy className="size-3" /> Копировать инвайт
+          <Copy className="size-4 shrink-0" /> Копировать инвайт
         </>
       )}
     </Button>

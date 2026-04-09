@@ -4,34 +4,31 @@ import { useState } from "react";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { DataTable } from "@/components/data-table";
 import { SectionCards } from "@/components/section-cards";
+import { PageHeader } from "@/components/layout/page-header";
 import data from "@/app/dashboard/data.json";
 
 export default function TeamDashboardPage() {
   const [timeRange, setTimeRange] = useState("90d");
 
   return (
-    <div className="flex flex-1 flex-col w-full">
-      <div className="@container/main flex flex-1 flex-col gap-2">
-        <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <div className="px-4 lg:px-6">
-            <h1 className="text-3xl font-bold tracking-tight">Дашборд</h1>
-            <p className="text-muted-foreground mt-1">
-              Динамика состояния команды и ключевые показатели.
-            </p>
-          </div>
+    <div className="flex-1 bg-white flex flex-col pt-6 pb-20">
+      <div className="px-4 sm:px-6 lg:px-8">
+        <PageHeader
+          title="Дашборд"
+          description="Динамика состояния команды и ключевые показатели."
+        />
+      </div>
 
-          <SectionCards metrics={null} />
+      <div className="@container/main flex flex-1 flex-col gap-10 px-4 sm:px-6 lg:px-8">
+        <SectionCards metrics={null} />
 
-          <div className="px-4 lg:px-6">
-            <ChartAreaInteractive
-              data={data}
-              timeRange={timeRange}
-              setTimeRange={setTimeRange}
-            />
-          </div>
+        <ChartAreaInteractive
+          data={data}
+          timeRange={timeRange}
+          setTimeRange={setTimeRange}
+        />
 
-          <DataTable data={data} />
-        </div>
+        <DataTable data={data} />
       </div>
     </div>
   );

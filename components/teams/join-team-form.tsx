@@ -4,12 +4,7 @@ import { useActionState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-  FieldDescription,
-} from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { ErrorMessage } from "@/components/errorMessage";
 import { joinTeam, TeamState } from "@/app/actions/team";
 import {
@@ -33,12 +28,12 @@ export function JoinTeamForm({
 
   return (
     <Card className="flex flex-col h-full shadow-sm border-muted/60">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <UserPlus className="size-5 text-muted-foreground" />
+      <CardHeader className="p-4 sm:p-6 pb-4">
+        <CardTitle className="flex items-center gap-2 text-lg sm:text-xl leading-tight">
+          <UserPlus className="size-5 text-muted-foreground shrink-0" />
           Присоединиться
         </CardTitle>
-        <CardDescription className="min-h-[80px] text-balance">
+        <CardDescription className="text-balance text-sm leading-relaxed mt-1.5">
           Введите уникальный ID команды, который вам передал менеджер.
         </CardDescription>
       </CardHeader>
@@ -48,33 +43,39 @@ export function JoinTeamForm({
         className={cn("flex flex-col flex-1", className)}
         {...props}
       >
-        <CardContent className="pb-6">
+        <CardContent className="p-4 sm:p-6 pt-0 pb-6">
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="inviteId">ID команды</FieldLabel>
+              <FieldLabel htmlFor="inviteId" className="text-sm font-medium">
+                ID команды
+              </FieldLabel>
               <Input
                 id="inviteId"
                 name="inviteId"
                 type="text"
                 placeholder="Например: 123456"
                 required
-                className="bg-muted/40 focus-visible:bg-transparent transition-colors"
+                className="bg-muted/40 focus-visible:bg-transparent transition-colors h-11 sm:h-10"
               />
             </Field>
 
-            <FieldDescription>
+            <div className="mt-2 min-h-5">
               {state?.error && <ErrorMessage message={state.error} />}
               {state?.success && (
-                <span className="text-green-600 dark:text-green-500 font-medium text-sm">
+                <div className="text-green-600 dark:text-green-500 font-medium text-sm text-balance">
                   Вы успешно присоединились!
-                </span>
+                </div>
               )}
-            </FieldDescription>
+            </div>
           </FieldGroup>
         </CardContent>
 
-        <CardFooter className="pt-2 mt-auto">
-          <Button type="submit" disabled={isPending} className="w-full">
+        <CardFooter className="p-4 sm:p-6 pt-2 mt-auto">
+          <Button
+            type="submit"
+            disabled={isPending}
+            className="w-full whitespace-normal h-auto py-2.5 sm:py-2 text-center text-balance"
+          >
             {isPending ? "Подключение..." : "Присоединиться"}
           </Button>
         </CardFooter>

@@ -2,7 +2,8 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { SidebarProvider } from "@/components/ui/sidebar"; // Добавляем импорт
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { Toaster } from "sonner";
 
 export default async function DashboardLayout({
   children,
@@ -25,10 +26,17 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <Sidebar teams={teams} />
-        <main className="flex-1 overflow-y-auto bg-muted/10">{children}</main>
-      </div>
+      <Sidebar teams={teams} />
+      <SidebarInset className="bg-muted/10">
+        <main className="flex-1 overflow-y-auto">{children}</main>
+      </SidebarInset>
+      <Toaster
+        theme="dark"
+        closeButton
+        richColors
+        expand={true}
+        position="top-center"
+      />
     </SidebarProvider>
   );
 }

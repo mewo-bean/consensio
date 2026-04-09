@@ -12,7 +12,32 @@ import {
 import { Button } from "@/components/ui/button";
 import { CheckCircle, AlertTriangle, Users } from "lucide-react";
 import { revalidatePath } from "next/cache";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import Link from "next/link";
+
+function PageHeader({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <header className="border-b border-border/60 pb-5 mb-10">
+      <div className="flex items-center gap-2">
+        <SidebarTrigger className="-ml-2.5 h-9 w-9 shrink-0" />
+        <h1 className="text-3xl font-black tracking-tight leading-none">
+          {title}
+        </h1>
+      </div>
+      {description && (
+        <p className="text-muted-foreground text-sm sm:text-base mt-2.5 pl-11 leading-relaxed max-w-2xl">
+          {description}
+        </p>
+      )}
+    </header>
+  );
+}
 
 export default async function InvitePage({
   params,
@@ -22,10 +47,9 @@ export default async function InvitePage({
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const resolvedParams = await params;
-  const teamId = parseInt(resolvedParams.id, 10);
+  const { id } = await params;
+  const teamId = parseInt(id, 10);
 
-  // 1. Проверяем, существует ли такая команда
   if (isNaN(teamId)) redirect("/dashboard");
 
   const team = await prisma.team.findUnique({
@@ -35,89 +59,96 @@ export default async function InvitePage({
 
   if (!team) {
     return (
-      <div className="flex-1 flex items-center justify-center p-6">
-        <Card className="max-w-md w-full text-center border-destructive">
-          <CardHeader>
-            <AlertTriangle className="size-12 text-destructive mx-auto mb-2" />
-            <CardTitle>Ошибка приглашения</CardTitle>
-            <CardDescription>
-              Группа не найдена или была удалена.
-            </CardDescription>
-          </CardHeader>
-          <CardFooter>
-            <Link href="/dashboard" className="w-full">
-              <Button className="w-full">На главную</Button>
-            </Link>
-          </CardFooter>
-        </Card>
+      <div className="flex-1 w-full pt-6 px-4 sm:px-6">
+        <PageHeader
+          title="Группа не найдена"
+          description="Похоже, эта команда была удалена или ID неверный."
+        />
+        <div className="flex justify-center pt-20">
+          <Card className="max-w-md w-full border-destructive/50 shadow-lg text-center">
+            <CardHeader>
+              <AlertTriangle className="size-12 text-destructive mx-auto mb-2" />
+              <CardTitle>Ошибка доступа</CardTitle>
+            </CardHeader>
+            <CardFooter>
+              <Link href="/dashboard" className="w-full">
+                <Button className="w-full" variant="outline">
+                  На главную
+                </Button>
+              </Link>
+            </CardFooter>
+          </Card>
+        </div>
       </div>
     );
   }
 
-  // 2. Проверяем, состоит ли пользователь уже в этой команде
   const isAlreadyMember = team.members.some((m) => m.userId === user.id);
 
-  // 3. Серверный экшен для мгновенного вступления
   async function acceptInvite() {
     "use server";
     const currentUser = await getCurrentUser();
     if (!currentUser) redirect("/login");
-
     try {
       await prisma.userTeam.create({
-        data: {
-          userId: currentUser.id,
-          teamId: teamId,
-          role: "member",
-        },
+        data: { userId: currentUser.id, teamId, role: "member" },
       });
       revalidatePath("/dashboard");
-    } catch (e) {
-      // Игнорируем ошибку, если кто-то кликнул дважды и нарушил уникальность
-    }
-
+    } catch (e) {}
     redirect(`/dashboard/teams/${teamId}`);
   }
 
   return (
-    <div className="flex-1 flex items-center justify-center p-6 bg-muted/20">
-      <Card className="max-w-md w-full shadow-lg">
-        <CardHeader className="text-center">
-          <div className="size-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Users className="size-8 text-primary" />
-          </div>
-          <CardTitle className="text-2xl">Вас пригласили!</CardTitle>
-          <CardDescription className="text-base mt-2">
-            Присоединяйтесь к рабочей группе <br />
-            <strong className="text-foreground">{team.title}</strong>
-          </CardDescription>
-        </CardHeader>
+    <div className="flex-1 w-full pt-6 px-4 sm:px-6 pb-20">
+      <PageHeader
+        title="Приглашение"
+        description={`Вы получили инвайт в рабочую группу "${team.title}". Присоединяйтесь к проекту.`}
+      />
 
-        <CardContent className="flex justify-center pb-2">
-          {isAlreadyMember && (
-            <div className="flex items-center gap-2 text-green-600 font-medium">
-              <CheckCircle className="size-5" />
-              Вы уже состоите в этой группе
+      <div className="flex justify-center pt-10 sm:pt-16">
+        <Card className="max-w-md w-full shadow-2xl border-muted/60 overflow-hidden">
+          <CardHeader className="text-center pb-2">
+            <div className="size-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Users className="size-8 text-primary" />
             </div>
-          )}
-        </CardContent>
+            <CardTitle className="text-2xl font-black">
+              Вас пригласили!
+            </CardTitle>
+            <CardDescription className="text-base mt-2">
+              Рабочая группа{" "}
+              <strong className="text-foreground">{team.title}</strong>
+            </CardDescription>
+          </CardHeader>
 
-        <CardFooter className="flex-col gap-3">
-          {isAlreadyMember ? (
-            <Link href={`/dashboard/teams/${team.id}`} className="w-full">
-              <Button className="w-full" variant="secondary">
-                Перейти к команде
-              </Button>
-            </Link>
-          ) : (
-            <form action={acceptInvite} className="w-full">
-              <Button type="submit" className="w-full text-base py-6">
-                Присоединиться к группе
-              </Button>
-            </form>
-          )}
-        </CardFooter>
-      </Card>
+          <CardContent className="flex justify-center py-4">
+            {isAlreadyMember && (
+              <div className="flex items-center gap-2 text-green-600 font-bold text-sm bg-green-50 px-4 py-2 rounded-full border border-green-100">
+                <CheckCircle className="size-4" />
+                Вы уже в команде
+              </div>
+            )}
+          </CardContent>
+
+          <CardFooter className="flex-col gap-3 pb-8">
+            {isAlreadyMember ? (
+              <Link href={`/dashboard/teams/${team.id}`} className="w-full">
+                <Button className="w-full font-bold h-12" variant="secondary">
+                  Перейти к дашборду
+                </Button>
+              </Link>
+            ) : (
+              <form action={acceptInvite} className="w-full">
+                <Button
+                  type="submit"
+                  className="w-full text-base h-12 font-black shadow-lg hover:scale-[1.02] transition-transform"
+                >
+                  Принять приглашение
+                </Button>
+              </form>
+            )}
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
 }

@@ -1,59 +1,53 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import { LogOut, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { leaveTeam } from "@/app/actions/team";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export function LeaveTeamButton({ teamId }: { teamId: number }) {
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLeave = async () => {
-    if (
-      !confirm(
-        "Вы уверены, что хотите покинуть эту команду? Вы потеряете доступ ко всем её данным.",
-      )
-    ) {
-      return;
-    }
+    const isConfirmed = confirm(
+      "Вы уверены, что хотите покинуть эту команду? Вы потеряете доступ ко всем её данным.",
+    );
+
+    if (!isConfirmed) return;
 
     setIsLoading(true);
-    setErrorMsg(null);
 
     try {
       const response = await leaveTeam(teamId);
 
       if (response?.error) {
-        setErrorMsg(response.error);
+        toast.error(response.error);
+      } else {
+        toast.success("Вы покинули команду");
       }
     } catch (e) {
-      setErrorMsg("Произошла ошибка при выходе из команды.");
+      toast.error("Произошла ошибка при выходе из команды.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="relative">
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={isLoading}
-        className="gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20"
-        onClick={handleLeave}
-      >
-        <LogOut className="size-4" />
-        {isLoading ? "Обработка..." : "Покинуть команду"}
-      </Button>
-
-      {errorMsg && (
-        <div className="absolute top-full right-0 mt-2 w-64 p-3 bg-background border border-destructive/30 shadow-lg rounded-lg z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-          <p className="text-xs text-destructive font-medium text-center text-balance">
-            {errorMsg}
-          </p>
-        </div>
+    <Button
+      variant="outline"
+      disabled={isLoading}
+      className="w-full sm:w-auto gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20 h-10 sm:h-9"
+      onClick={handleLeave}
+    >
+      {isLoading ? (
+        <Loader2 className="size-4 animate-spin shrink-0" />
+      ) : (
+        <LogOut className="size-4 shrink-0" />
       )}
-    </div>
+      <span className="font-bold text-xs uppercase tracking-wider truncate">
+        {isLoading ? "Обработка..." : "Покинуть"}
+      </span>
+    </Button>
   );
 }

@@ -1,12 +1,13 @@
 "use client";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
 
 export function SiteHeader({ className }: { className?: string }) {
   return (
-    <div className={cn("flex items-center gap-2", className)}>
-      <SidebarTrigger className="size-9" />
-    </div>
+    <header className="flex h-14 sm:h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
+      <SidebarTrigger className="-ml-2" />
+
+      <div className="flex flex-1 items-center justify-between"></div>
+    </header>
   );
 }
