@@ -116,7 +116,7 @@ export function Sidebar({ teams }: SidebarProps) {
               href={`/dashboard/teams/${currentTeamId}`}
               className={navLinkClass(`/dashboard/teams/${currentTeamId}`)}
             >
-              <LayoutDashboard className="size-4 shrink-0 text-orange-500" />
+              <BarChart2 className="size-4 shrink-0 text-green-500" />
               <span>Дашборд</span>
             </Link>
 
@@ -133,15 +133,6 @@ export function Sidebar({ teams }: SidebarProps) {
             {/* Эти ссылки видны только администраторам */}
             {isManager && (
               <>
-                <Link
-                  href={`/dashboard/teams/${currentTeamId}/reports`}
-                  className={navLinkClass(
-                    `/dashboard/teams/${currentTeamId}/reports`,
-                  )}
-                >
-                  <BarChart2 className="size-4 shrink-0 text-green-500" />
-                  <span>Отчеты</span>
-                </Link>
                 <Link
                   href={`/dashboard/teams/${currentTeamId}/feedback`}
                   className={navLinkClass(

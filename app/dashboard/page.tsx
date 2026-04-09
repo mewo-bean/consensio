@@ -17,8 +17,9 @@ export default async function DashboardHomePage() {
             <Sparkles className="size-3" /> Consensio v1.0
           </div>
           <h1 className="text-5xl font-black tracking-tighter md:text-6xl text-balance leading-[1.1]">
-            Понимайте свою команду <br />
-            <span className="text-primary">без лишних слов.</span>
+            Понимайте больше.
+            <br />
+            <span className="text-primary">Улучшайте вместе.</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Привет, {user.username || user.email}! Consensio помогает
