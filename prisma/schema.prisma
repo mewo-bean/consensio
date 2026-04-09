@@ -14,7 +14,7 @@ model User {
   username             String                @unique @db.VarChar(50)
   email                String                @unique @db.VarChar(255)
   passwordHash         String                @map("password_hash") @db.VarChar(255)
-  tgId                 Int?                  @map("tg_id")
+  tgId                 BigInt?               @map("tg_id")
   surveyResults        SurveyResult[]
   complaintsFrom       Complaint[]           @relation("from_user")
   complaintsTo         Complaint[]           @relation("to_user")
