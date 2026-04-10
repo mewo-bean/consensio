@@ -5,15 +5,28 @@ import { auth } from "@/auth"
 
 export async function getAnalytics(days: number = 90) {
     const session = await auth()
-    if (!session?.user) throw new Error("Unauthorized")
+    if (!session?.user?.id) throw new Error("Unauthorized")
 
-    // Вычисляем дату начала периода
+    const userId = parseInt(session.user.id, 10);
+
+    const userTeams = await prisma.userTeam.findMany({
+        where: { userId: userId },
+        select: { teamId: true }
+    })
+
+    const teamIds = userTeams.map(ut => ut.teamId)
+
+    if (teamIds.length === 0) return []
+
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
     const results = await prisma.surveyResult.findMany({
         where: {
             sentAt: { gte: startDate },
+            teamSurvey: {
+                teamId: { in: teamIds }
+            }
         },
         include: {
             sampleSurvey: { select: { title: true } }
@@ -21,11 +34,9 @@ export async function getAnalytics(days: number = 90) {
         orderBy: { sentAt: 'asc' }
     })
 
-    // Группировка через Map для чистого кода
     const dataMap = new Map<string, { stress: number[], engagement: number[] }>()
 
     results.forEach(res => {
-        // Получаем ключ в формате ГГГГ-ММ-ДД
         const dateKey = res.sentAt.toISOString().split('T')[0];
 
         if (!dataMap.has(dateKey)) {
@@ -40,7 +51,6 @@ export async function getAnalytics(days: number = 90) {
         }
     })
 
-    // Превращаем в массив для Recharts
     return Array.from(dataMap.entries()).map(([date, values]) => ({
         date,
         stress: values.stress.length > 0
