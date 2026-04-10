@@ -27,19 +27,22 @@ export function Sidebar({ teams }: SidebarProps) {
   const currentTeam = teams.find((t) => t.id.toString() === currentTeamId);
   const isManager = currentTeam?.role === "manager";
 
+  // ✨ 1. Добавляем мобильные стили прямо в базовый класс ссылок
   const navLinkClass = (path: string) =>
     cn(
       "flex items-center gap-3 rounded-lg px-3 py-2 transition-all text-sm font-medium overflow-hidden",
+      "max-sm:min-h-[44px] max-sm:py-3 max-sm:text-base", // Увеличиваем на мобилках
       pathname === path
         ? "bg-primary/10 text-foreground border-l-4 border-primary rounded-l-none"
         : "text-muted-foreground hover:bg-muted hover:text-foreground border-l-4 border-transparent rounded-l-none",
     );
 
   return (
+    // ✨ 2. Убрали отсюда max-sm:h-12, чтобы не ломать весь сайдбар
     <SidebarBase collapsible="offcanvas">
       <div className="flex w-full flex-col gap-6 px-4 py-4">
         <div className="px-2 overflow-hidden">
-          <Link href="/dashboard">
+          <Link href="/dashboard" className="block max-sm:py-2">
             <h1 className="text-3xl font-extrabold tracking-tight text-primary truncate">
               consensio.
             </h1>
@@ -48,9 +51,13 @@ export function Sidebar({ teams }: SidebarProps) {
 
         <nav className="flex flex-col gap-2 w-full">
           <div>
+            {/* ✨ 3. Увеличиваем кнопку "Мои группы" */}
             <button
               onClick={() => setIsTeamsOpen(!isTeamsOpen)}
-              className="flex w-full items-center justify-between px-3 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-md transition-colors"
+              className={cn(
+                "flex w-full items-center justify-between px-3 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-md transition-colors",
+                "max-sm:min-h-11 max-sm:py-3 max-sm:text-base",
+              )}
             >
               <div className="flex items-center gap-3">
                 <Users className="size-4 shrink-0 text-purple-500" />
@@ -73,6 +80,7 @@ export function Sidebar({ teams }: SidebarProps) {
                       href={`/dashboard/teams/${team.id}`}
                       className={cn(
                         "flex items-center gap-2 px-2 py-1.5 text-sm rounded-md transition-colors overflow-hidden",
+                        "max-sm:min-h-11 max-sm:py-3 max-sm:text-base", // ✨ Увеличиваем команды
                         currentTeamId === team.id.toString()
                           ? "text-foreground bg-muted font-medium"
                           : "text-muted-foreground hover:text-foreground hover:bg-muted",
@@ -90,7 +98,10 @@ export function Sidebar({ teams }: SidebarProps) {
 
                 <Link
                   href="/dashboard/teams/new"
-                  className="flex items-center gap-2 px-2 py-1.5 mt-2 text-sm font-medium text-primary hover:bg-primary/10 rounded-md transition-colors"
+                  className={cn(
+                    "flex items-center gap-2 px-2 py-1.5 mt-2 text-sm font-medium text-primary hover:bg-primary/10 rounded-md transition-colors",
+                    "max-sm:min-h-11 max-sm:py-3 max-sm:text-base",
+                  )}
                 >
                   <PlusCircle className="size-4 shrink-0" />
                   <span>Добавить команду</span>
@@ -109,7 +120,7 @@ export function Sidebar({ teams }: SidebarProps) {
 
           {currentTeamId && currentTeam && (
             <div className="mt-4 flex flex-col gap-2 border-t pt-4 w-full">
-              <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">
+              <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate max-sm:text-xs">
                 {currentTeam.title}
               </p>
 

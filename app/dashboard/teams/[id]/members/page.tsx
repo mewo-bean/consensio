@@ -45,16 +45,9 @@ export default async function TeamPage({
         title={team.title}
         description="Управляйте участниками вашей команды, назначайте роли и используйте ID для приглашения новых коллег."
       >
-        <div className="flex-1 sm:flex-none">
-          <LeaveTeamButton teamId={teamId} />
-        </div>
-        {isManager && (
-          <div className="flex-1 sm:flex-none">
-            <DeleteTeamButton teamId={teamId} />
-          </div>
-        )}
+        <LeaveTeamButton teamId={teamId} />
+        {isManager && <DeleteTeamButton teamId={teamId} />}
       </PageHeader>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <Card className="lg:sticky lg:top-6 shadow-sm overflow-hidden border-muted/60">
           <CardHeader className="bg-muted/30 pb-4">
@@ -155,6 +148,13 @@ export default async function TeamPage({
             </div>
           </CardContent>
         </Card>
+
+        <div className="sm:hidden mt-12 pt-8 border-t border-destructive/20">
+          <div className="flex flex-col gap-3">
+            <LeaveTeamButton teamId={teamId} />
+            {isManager && <DeleteTeamButton teamId={teamId} />}
+          </div>
+        </div>
       </div>
     </div>
   );
