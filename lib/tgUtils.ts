@@ -38,10 +38,13 @@ async function fetchBotUsername(): Promise<string> {
   return data.result.username;
 }
 
-export async function sendTelegramMessage(chatId: number, message: string) {
+export async function sendTelegramMessage(
+  chatId: number | bigint | string,
+  message: string,
+) {
   await fetch(`${TELEGRAM_BASE_URL}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: `${chatId}`, text: message }),
+    body: JSON.stringify({ chat_id: String(chatId), text: message }),
   });
 }

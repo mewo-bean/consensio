@@ -1,14 +1,12 @@
 "use client";
 
-import {useState} from "react";
 import {ChartAreaInteractive} from "@/components/chart-area-interactive";
-import {DataTable} from "@/components/data-table";
 import {SectionCards} from "@/components/section-cards";
 import {PageHeader} from "@/components/layout/page-header";
-import data from "@/app/dashboard/data.json";
 import { getAnalytics } from "@/app/get-analytics";
 import { getMetrics } from "@/app/get-metrics";
 import * as React from "react";
+import { useParams } from "next/navigation";
 
 interface DashboardMetrics {
     participationRate: number;
@@ -24,18 +22,27 @@ interface ChartData {
 }
 
 export default function TeamDashboardPage() {
+    const params = useParams<{ id: string }>();
+    const teamId = React.useMemo(() => {
+        const id = params?.id;
+        const parsed = typeof id === "string" ? parseInt(id, 10) : NaN;
+        return Number.isFinite(parsed) ? parsed : null;
+    }, [params]);
+
     const [timeRange, setTimeRange] = React.useState("90d");
     const [data, setData] = React.useState<ChartData[]>([]);
     const [metrics, setMetrics] = React.useState<DashboardMetrics | null>(null);
 
     React.useEffect(() => {
-        getMetrics().then(setMetrics).catch(console.error);
-    }, []);
+        if (!teamId) return;
+        getMetrics(teamId).then(setMetrics).catch(console.error);
+    }, [teamId]);
 
     React.useEffect(() => {
         const days = parseInt(timeRange);
-        getAnalytics(days).then(setData).catch(console.error);
-    }, [timeRange]);
+        if (!teamId) return;
+        getAnalytics(days, teamId).then(setData).catch(console.error);
+    }, [timeRange, teamId]);
 
     return (
         <div className="flex-1 bg-white flex flex-col pt-6 pb-20">

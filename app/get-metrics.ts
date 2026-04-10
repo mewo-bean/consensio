@@ -3,19 +3,29 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 
-export async function getMetrics() {
+export async function getMetrics(teamId?: number) {
     const session = await auth()
     if (!session?.user?.id) return null
 
     const userId = parseInt(session.user.id)
 
-    // 1. Находим ВСЕ команды, в которых состоит пользователь (любая роль)
-    const userTeams = await prisma.userTeam.findMany({
-        where: { userId: userId },
-        select: { teamId: true }
-    })
+    let teamIds: number[] = []
+    if (typeof teamId === "number" && Number.isFinite(teamId)) {
+        const membership = await prisma.userTeam.findUnique({
+            where: { userId_teamId: { userId, teamId } },
+            select: { teamId: true },
+        })
+        if (!membership) return null
+        teamIds = [teamId]
+    } else {
+        // 1. Находим ВСЕ команды, в которых состоит пользователь (любая роль)
+        const userTeams = await prisma.userTeam.findMany({
+            where: { userId: userId },
+            select: { teamId: true }
+        })
 
-    const teamIds = userTeams.map(t => t.teamId)
+        teamIds = userTeams.map(t => t.teamId)
+    }
 
     // Если пользователь не привязан ни к одной команде
     if (teamIds.length === 0) return null
