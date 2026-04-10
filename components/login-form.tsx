@@ -36,6 +36,7 @@ export function LoginForm({
             type="email"
             name="email"
             placeholder="m@example.com"
+            defaultValue={state?.fields?.email}
             required
             className="bg-background"
           />

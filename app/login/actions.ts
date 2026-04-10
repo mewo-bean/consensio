@@ -1,10 +1,16 @@
 'use server'
 
-import { redirect } from "next/navigation"
-import { signIn } from "@/auth"
-import { AuthError } from "next-auth"
+import {redirect} from "next/navigation"
+import {signIn} from "@/auth"
+import {AuthError} from "next-auth"
 
-export type LoginState = { error?: string }
+export type LoginState = {
+    error?: string
+    fields?: {
+        username?: string;
+        email?: string;
+    }
+}
 
 export async function loginAction(
     _prevState: LoginState | null,
@@ -13,8 +19,8 @@ export async function loginAction(
     const email = String(formData.get('email')).trim();
     const password = String(formData.get('password')).trim()
 
-    if(!email || !password) {
-        return { error: 'Все поля должны быть заполнены'}
+    if (!email || !password) {
+        return {error: 'Все поля должны быть заполнены', fields: { email }}
     }
 
     try {
@@ -30,10 +36,10 @@ export async function loginAction(
     } catch (error) {
         if (error instanceof AuthError) {
             if (error.type === 'CredentialsSignin') {
-                return { error: 'Неверный email или пароль'}
+                return {error: 'Неверный email или пароль', fields: { email }}
             }
 
-            return { error: 'Ошибка авторизации'}
+            return {error: 'Ошибка авторизации', fields: { email}}
         }
 
         throw error

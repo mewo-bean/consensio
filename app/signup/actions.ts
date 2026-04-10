@@ -9,7 +9,15 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const HAS_LETTER = /[a-zA-Z]/;
 const HAS_CHAR = /[!@#$%^&*()]/;
 
-export type SignupState = {error?: string}
+export type SignupState = {
+    error?: string
+    fields?: {
+        username?: string;
+        email?: string;
+        firstName?: string;
+        lastName?: string;
+    }
+}
 
 export async function signupAction(
     _prevState: SignupState | null,
@@ -21,52 +29,52 @@ export async function signupAction(
     const email = formData.get('email') as string | undefined;
     const password = formData.get('password') as string | undefined;
 
-    console.log('name',firstName,lastName, username, email, password)
+    console.log('name', firstName, lastName, username, email, password)
     if (!firstName) {
-        return {error: 'Введите имя'};
+        return {error: 'Введите имя', fields: {username, email, firstName, lastName}};
     }
 
     if (!lastName) {
-        return {error: 'Введите фамилию'};
+        return {error: 'Введите фамилию',fields: { email, username, firstName, lastName }};
     }
 
     if (!username) {
-        return {error: 'Введите username'};
+        return {error: 'Введите username',fields: { email, username, firstName, lastName }};
     }
     const existingUsername = await prisma.user.findUnique({
-        where: { username: username },
+        where: {username: username},
     });
 
     if (existingUsername) {
-        return { error: 'Имя пользователя уже занято' };
+        return {error: 'Имя пользователя уже занято',fields: { email, username, firstName, lastName }};
     }
 
     if (!email) {
-        return { error: "Введите email"}
+        return {error: "Введите email", fields: { email, username, firstName, lastName }}
     }
 
-    if(!EMAIL_REGEX.test(email)) {
-        return { error: 'Некорректный формат email' }
+    if (!EMAIL_REGEX.test(email)) {
+        return {error: 'Некорректный формат email', fields: { email, username, firstName, lastName }}
     }
 
-    if(!password || password.length < MIN_PAS_LEN) {
-        return { error: 'Пароль должен быть 8 символов'}
+    if (!password || password.length < MIN_PAS_LEN) {
+        return {error: 'Пароль должен быть 8 символов', fields: { email, username, firstName, lastName}}
     }
 
     if (!HAS_LETTER.test(password)) {
-        return { error: 'В пароле должны быть латинские буквы'}
+        return {error: 'В пароле должны быть латинские буквы', fields: { email, username, firstName, lastName}}
     }
 
     if (!HAS_CHAR.test(password)) {
-        return { error: 'В пароле должен быть один из символов !@#$%^&*()'}
+        return {error: 'В пароле должен быть один из символов !@#$%^&*()', fields: { email, username, firstName, lastName}}
     }
 
     const existing = await prisma.user.findUnique({
-        where: { email}
+        where: {email}
     })
 
     if (existing) {
-        return { error: 'Email уже занят'}
+        return {error: 'Email уже занят', fields: { email, username, firstName, lastName}}
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

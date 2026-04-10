@@ -35,6 +35,7 @@ export function SignupForm({
               name="firstName"
               type="text"
               placeholder="Иван"
+              defaultValue={state?.fields?.firstName}
               required
               className="bg-background"
           />
@@ -46,6 +47,7 @@ export function SignupForm({
               name="lastName"
               type="text"
               placeholder="Иванов"
+              defaultValue={state?.fields?.lastName}
               required
               className="bg-background"
           />
@@ -57,6 +59,7 @@ export function SignupForm({
             name="username"
             type="text"
             placeholder="ivanchik"
+            defaultValue={state?.fields?.username}
             required
             className="bg-background"
           />
@@ -68,6 +71,7 @@ export function SignupForm({
             type="email"
             name="email"
             placeholder="m@example.com"
+            defaultValue={state?.fields?.email}
             required
             className="bg-background"
           />
