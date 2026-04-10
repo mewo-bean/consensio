@@ -13,7 +13,7 @@ export default function NewTeamPage() {
       </div>
 
       <div className="flex flex-1 flex-col px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+        <div className="max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <CreateTeamForm />
           <JoinTeamForm />
         </div>

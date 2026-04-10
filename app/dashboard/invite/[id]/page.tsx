@@ -12,32 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { CheckCircle, AlertTriangle, Users } from "lucide-react";
 import { revalidatePath } from "next/cache";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import Link from "next/link";
-
-function PageHeader({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
-  return (
-    <header className="border-b border-border/60 pb-5 mb-10">
-      <div className="flex items-center gap-2">
-        <SidebarTrigger className="-ml-2.5 h-9 w-9 shrink-0" />
-        <h1 className="text-3xl font-black tracking-tight leading-none">
-          {title}
-        </h1>
-      </div>
-      {description && (
-        <p className="text-muted-foreground text-sm sm:text-base mt-2.5 pl-11 leading-relaxed max-w-2xl">
-          {description}
-        </p>
-      )}
-    </header>
-  );
-}
+import { PageHeader } from "@/components/layout/page-header";
 
 export default async function InvitePage({
   params,
@@ -59,25 +35,29 @@ export default async function InvitePage({
 
   if (!team) {
     return (
-      <div className="flex-1 w-full pt-6 px-4 sm:px-6">
-        <PageHeader
-          title="Группа не найдена"
-          description="Похоже, эта команда была удалена или ID неверный."
-        />
-        <div className="flex justify-center pt-20">
-          <Card className="max-w-md w-full border-destructive/50 shadow-lg text-center">
-            <CardHeader>
-              <AlertTriangle className="size-12 text-destructive mx-auto mb-2" />
-              <CardTitle>Ошибка доступа</CardTitle>
-            </CardHeader>
-            <CardFooter>
-              <Link href="/dashboard" className="w-full">
-                <Button className="w-full" variant="outline">
-                  На главную
-                </Button>
-              </Link>
-            </CardFooter>
-          </Card>
+      <div className="flex-1 bg-white flex flex-col pt-6 pb-20">
+        <div className="px-4 sm:px-6 lg:px-8">
+          <PageHeader
+            title="Группа не найдена"
+            description="Похоже, эта команда была удалена или ID неверный."
+          />
+        </div>
+        <div className="flex flex-1 flex-col px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-center pt-20">
+            <Card className="max-w-md w-full border-destructive/50 shadow-lg text-center">
+              <CardHeader>
+                <AlertTriangle className="size-12 text-destructive mx-auto mb-2" />
+                <CardTitle>Ошибка доступа</CardTitle>
+              </CardHeader>
+              <CardFooter>
+                <Link href="/dashboard" className="w-full">
+                  <Button className="w-full" variant="outline">
+                    На главную
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+          </div>
         </div>
       </div>
     );
@@ -99,55 +79,59 @@ export default async function InvitePage({
   }
 
   return (
-    <div className="flex-1 w-full pt-6 px-4 sm:px-6 pb-20">
-      <PageHeader
-        title="Приглашение"
-        description={`Вы получили инвайт в рабочую группу "${team.title}". Присоединяйтесь к проекту.`}
-      />
+    <div className="flex-1 bg-white flex flex-col pt-6 pb-20">
+      <div className="px-4 sm:px-6 lg:px-8">
+        <PageHeader
+          title="Приглашение"
+          description={`Вы получили инвайт в рабочую группу "${team.title}". Присоединяйтесь к проекту.`}
+        />
+      </div>
 
-      <div className="flex justify-center pt-10 sm:pt-16">
-        <Card className="max-w-md w-full shadow-2xl border-muted/60 overflow-hidden">
-          <CardHeader className="text-center pb-2">
-            <div className="size-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Users className="size-8 text-primary" />
-            </div>
-            <CardTitle className="text-2xl font-black">
-              Вас пригласили!
-            </CardTitle>
-            <CardDescription className="text-base mt-2">
-              Рабочая группа{" "}
-              <strong className="text-foreground">{team.title}</strong>
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="flex justify-center py-4">
-            {isAlreadyMember && (
-              <div className="flex items-center gap-2 text-green-600 font-bold text-sm bg-green-50 px-4 py-2 rounded-full border border-green-100">
-                <CheckCircle className="size-4" />
-                Вы уже в команде
+      <div className="flex flex-1 flex-col px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-center pt-10 sm:pt-16">
+          <Card className="max-w-md w-full shadow-2xl border-muted/60 overflow-hidden">
+            <CardHeader className="text-center pb-2">
+              <div className="size-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="size-8 text-primary" />
               </div>
-            )}
-          </CardContent>
+              <CardTitle className="text-2xl font-black">
+                Вас пригласили!
+              </CardTitle>
+              <CardDescription className="text-base mt-2">
+                Рабочая группа{" "}
+                <strong className="text-foreground">{team.title}</strong>
+              </CardDescription>
+            </CardHeader>
 
-          <CardFooter className="flex-col gap-3 pb-8">
-            {isAlreadyMember ? (
-              <Link href={`/dashboard/teams/${team.id}`} className="w-full">
-                <Button className="w-full font-bold h-12" variant="secondary">
-                  Перейти к дашборду
-                </Button>
-              </Link>
-            ) : (
-              <form action={acceptInvite} className="w-full">
-                <Button
-                  type="submit"
-                  className="w-full text-base h-12 font-black shadow-lg hover:scale-[1.02] transition-transform"
-                >
-                  Принять приглашение
-                </Button>
-              </form>
-            )}
-          </CardFooter>
-        </Card>
+            <CardContent className="flex justify-center py-4">
+              {isAlreadyMember && (
+                <div className="flex items-center gap-2 text-green-600 font-bold text-sm bg-green-50 px-4 py-2 rounded-full border border-green-100">
+                  <CheckCircle className="size-4" />
+                  Вы уже в команде
+                </div>
+              )}
+            </CardContent>
+
+            <CardFooter className="flex-col gap-3 pb-8">
+              {isAlreadyMember ? (
+                <Link href={`/dashboard/teams/${team.id}`} className="w-full">
+                  <Button className="w-full font-bold h-12" variant="secondary">
+                    Перейти к дашборду
+                  </Button>
+                </Link>
+              ) : (
+                <form action={acceptInvite} className="w-full">
+                  <Button
+                    type="submit"
+                    className="w-full text-base h-12 font-black shadow-lg hover:scale-[1.02] transition-transform"
+                  >
+                    Принять приглашение
+                  </Button>
+                </form>
+              )}
+            </CardFooter>
+          </Card>
+        </div>
       </div>
     </div>
   );

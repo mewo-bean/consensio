@@ -19,7 +19,7 @@ export function PageHeader({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4 min-w-0">
           <SidebarTrigger className="-ml-1 h-10 w-10 shrink-0 bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-lg" />
-          <h1 className="text-3xl font-black tracking-tight leading-none truncate">
+          <h1 className="text-3xl font-black tracking-tight leading-tight">
             {title}
           </h1>
         </div>
@@ -28,7 +28,7 @@ export function PageHeader({
       </div>
 
       {description && (
-        <p className="text-muted-foreground text-sm sm:text-base mt-3 pl-[52px] leading-relaxed max-w-3xl">
+        <p className="text-muted-foreground text-sm sm:text-base mt-3 pl-13 leading-relaxed max-w-3xl">
           {description}
         </p>
       )}

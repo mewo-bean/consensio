@@ -27,6 +27,15 @@ export function LeaveTeamButton({ teamId }: { teamId: number }) {
         toast.success("Вы покинули команду");
       }
     } catch (e) {
+      const error = e as { message?: string; digest?: string };
+
+      if (
+        error?.message === "NEXT_REDIRECT" ||
+        error?.digest?.startsWith("NEXT_REDIRECT")
+      ) {
+        throw e;
+      }
+
       toast.error("Произошла ошибка при выходе из команды.");
     } finally {
       setIsLoading(false);

@@ -28,7 +28,7 @@ export function JoinTeamForm({
 
   return (
     <Card className="flex flex-col h-full shadow-sm border-muted/60">
-      <CardHeader className="p-4 sm:p-6 pb-4">
+      <CardHeader className="px-4 sm:px-5 pt-1 pb-0">
         <CardTitle className="flex items-center gap-2 text-lg sm:text-xl leading-tight">
           <UserPlus className="size-5 text-muted-foreground shrink-0" />
           Присоединиться
@@ -40,10 +40,10 @@ export function JoinTeamForm({
 
       <form
         action={formAction}
-        className={cn("flex flex-col flex-1", className)}
+        className={cn("mt-auto flex flex-col", className)}
         {...props}
       >
-        <CardContent className="p-4 sm:p-6 pt-0 pb-6">
+        <CardContent className="px-4 sm:px-5 pt-0 pb-3">
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="inviteId" className="text-sm font-medium">
@@ -55,22 +55,24 @@ export function JoinTeamForm({
                 type="text"
                 placeholder="Например: 123456"
                 required
-                className="bg-muted/40 focus-visible:bg-transparent transition-colors h-11 sm:h-10"
+                className="bg-muted/40 focus-visible:bg-transparent transition-colors h-11 sm:h-10 mt-1.5"
               />
             </Field>
 
-            <div className="mt-2 min-h-5">
-              {state?.error && <ErrorMessage message={state.error} />}
-              {state?.success && (
-                <div className="text-green-600 dark:text-green-500 font-medium text-sm text-balance">
-                  Вы успешно присоединились!
-                </div>
-              )}
-            </div>
+            {(state?.error || state?.success) && (
+              <div className="min-h-2 mt-1">
+                {state?.error && <ErrorMessage message={state.error} />}
+                {state?.success && (
+                  <div className="text-green-600 dark:text-green-500 font-medium text-sm text-balance">
+                    Вы успешно присоединились!
+                  </div>
+                )}
+              </div>
+            )}
           </FieldGroup>
         </CardContent>
 
-        <CardFooter className="p-4 sm:p-6 pt-2 mt-auto">
+        <CardFooter className="p-4 sm:p-5 pt-4">
           <Button
             type="submit"
             disabled={isPending}

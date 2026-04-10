@@ -23,8 +23,9 @@ export default async function DashboardHomePage() {
       <div className="max-w-4xl mx-auto py-10 px-6 space-y-16">
         <section className="text-center space-y-6">
           <h1 className="text-5xl font-black tracking-tighter md:text-6xl text-balance leading-[1.1]">
-            Понимайте свою команду <br />
-            <span className="text-primary">без лишних слов.</span>
+            Соединяя людей,
+            <br />
+            <span className="text-primary"> созидая понимание</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Привет, {user.username || user.email}! Consensio помогает
