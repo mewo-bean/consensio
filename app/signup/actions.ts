@@ -15,11 +15,20 @@ export async function signupAction(
     _prevState: SignupState | null,
     formData: FormData
 ): Promise<SignupState> {
+    const firstName = formData.get('firstName') as string | undefined;
+    const lastName = formData.get('lastName') as string | undefined;
     const username = formData.get('username') as string | undefined;
     const email = formData.get('email') as string | undefined;
     const password = formData.get('password') as string | undefined;
 
-    console.log('name', username, email, password)
+    console.log('name',firstName,lastName, username, email, password)
+    if (!firstName) {
+        return {error: 'Введите имя'};
+    }
+
+    if (!lastName) {
+        return {error: 'Введите фамилию'};
+    }
 
     if (!username) {
         return {error: 'Введите username'};
@@ -64,6 +73,8 @@ export async function signupAction(
 
     await prisma.user.create({
         data: {
+            first_name: firstName,
+            last_name: lastName,
             email,
             username: username,
             password_hash: hashedPassword,
