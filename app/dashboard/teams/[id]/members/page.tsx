@@ -112,15 +112,27 @@ export default async function TeamPage({
                     </div>
                     <div className="min-w-0">
                       <div className="font-bold text-sm sm:text-base truncate flex items-center gap-2">
-                        {member.user.firstName || member.user.username}
+                        {[member.user.firstName, member.user.lastName]
+                          .filter(Boolean)
+                          .join(" ") || member.user.username}
                         {member.userId === user.id && (
                           <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase font-black">
                             Вы
                           </span>
                         )}
                       </div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {member.user.email}
+                      <div className="text-xs text-muted-foreground truncate flex items-center gap-1.5 mt-0.5">
+                        {member.user.username && (
+                          <>
+                            <span className="font-medium text-muted-foreground/80">
+                              @{member.user.username}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground/40">
+                              &bull;
+                            </span>
+                          </>
+                        )}
+                        <span>{member.user.email}</span>
                       </div>
                     </div>
                   </div>
