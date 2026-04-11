@@ -29,7 +29,7 @@ export async function createTeam(
         title: title,
         members: {
           create: {
-            user_id: user.id,
+            userId: user.id,
             role: "manager",
           },
         },
@@ -58,8 +58,8 @@ export async function joinTeam(
   try {
     await prisma.userTeam.create({
       data: {
-        user_id: user.id,
-        team_id: inviteId,
+        userId: user.id,
+        teamId: inviteId,
         role: "member",
       },
     });
@@ -82,14 +82,14 @@ export async function updateMemberRole(
   if (!user) return { error: "Не авторизован" };
 
   const adminCheck = await prisma.userTeam.findFirst({
-    where: { team_id: teamId, user_id: user.id, role: "manager" },
+    where: { teamId: teamId, userId: user.id, role: "manager" },
   });
   if (!adminCheck) return { error: "У вас нет прав" };
 
   try {
     await prisma.userTeam.update({
       where: {
-        user_id_team_id: { user_id: targetUserId, team_id: teamId },
+        userId_teamId: { userId: targetUserId, teamId: teamId },
       },
       data: { role: newRole },
     });
@@ -105,14 +105,14 @@ export async function removeMember(teamId: number, targetUserId: number) {
   if (!user) return { error: "Не авторизован" };
 
   const adminCheck = await prisma.userTeam.findFirst({
-    where: { team_id: teamId, user_id: user.id, role: "manager" },
+    where: { teamId: teamId, userId: user.id, role: "manager" },
   });
   if (!adminCheck) return { error: "У вас нет прав" };
 
   try {
     await prisma.userTeam.delete({
       where: {
-        user_id_team_id: { user_id: targetUserId, team_id: teamId },
+        userId_teamId: { userId: targetUserId, teamId: teamId },
       },
     });
     revalidatePath(`/dashboard/teams/${teamId}`);
@@ -128,7 +128,7 @@ export async function deleteTeam(teamId: number) {
 
   const membership = await prisma.userTeam.findUnique({
     where: {
-      user_id_team_id: { user_id: user.id, team_id: teamId },
+      userId_teamId: { userId: user.id, teamId: teamId },
     },
   });
 
@@ -138,7 +138,7 @@ export async function deleteTeam(teamId: number) {
 
   try {
     await prisma.userTeam.deleteMany({
-      where: { team_id: teamId },
+      where: { teamId: teamId },
     });
 
     await prisma.team.delete({
@@ -162,7 +162,7 @@ export async function leaveTeam(teamId: number) {
   try {
     const membership = await prisma.userTeam.findUnique({
       where: {
-        user_id_team_id: { user_id: user.id, team_id: teamId },
+        userId_teamId: { userId: user.id, teamId: teamId },
       },
     });
 
@@ -172,7 +172,7 @@ export async function leaveTeam(teamId: number) {
     if (membership.role === "manager") {
       const managersCount = await prisma.userTeam.count({
         where: {
-          team_id: teamId,
+          teamId: teamId,
           role: "manager",
         },
       });
@@ -189,7 +189,7 @@ export async function leaveTeam(teamId: number) {
     // если всё в порядке (он обычный участник или админов несколько) — удаляем
     await prisma.userTeam.delete({
       where: {
-        user_id_team_id: { user_id: user.id, team_id: teamId },
+        userId_teamId: { userId: user.id, teamId: teamId },
       },
     });
 

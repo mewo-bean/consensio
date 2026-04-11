@@ -6,11 +6,7 @@ import { deleteTeam } from "@/app/actions/team";
 
 export function DeleteTeamButton({ teamId }: { teamId: number }) {
   const handleDelete = async () => {
-    if (
-      confirm(
-        "Вы уверены? Это действие удалит команду и все связанные данные навсегда!",
-      )
-    ) {
+    if (confirm("Удалить команду навсегда?")) {
       await deleteTeam(teamId);
     }
   };
@@ -18,12 +14,13 @@ export function DeleteTeamButton({ teamId }: { teamId: number }) {
   return (
     <Button
       variant="destructive"
-      size="sm"
-      className="gap-2"
+      className="w-full sm:w-auto gap-2 h-10 sm:h-9"
       onClick={handleDelete}
     >
-      <Trash2 className="size-4" />
-      Удалить команду
+      <Trash2 className="size-4 shrink-0" />
+      <span className="font-bold text-xs uppercase tracking-wider">
+        Удалить
+      </span>
     </Button>
   );
 }
