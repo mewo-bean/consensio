@@ -43,6 +43,7 @@ export default async function TeamFeedbackPage({
   if (!team) redirect("/dashboard");
 
   let feedbackItems: FeedbackItem[] = [];
+  let totalFeedbackCount = 0;
 
   if (membership.role === "manager") {
     const managerIds = await prisma.userTeam.findMany({
@@ -52,11 +53,17 @@ export default async function TeamFeedbackPage({
 
     const toUserIds = managerIds.map((m) => m.userId);
 
+    totalFeedbackCount = await prisma.complaint.count({
+      where: {
+        teamId,
+        toUserId: { in: toUserIds },
+      },
+    });
+
     const complaints = await prisma.complaint.findMany({
       where: {
         teamId,
         toUserId: { in: toUserIds },
-        isAnon: false,
       },
       include: {
         fromUser: {
@@ -74,8 +81,9 @@ export default async function TeamFeedbackPage({
 
     feedbackItems = complaints.map((c) => ({
       id: c.id,
-      userLabel: userLabel(c.fromUser),
+      userLabel: c.isAnon ? "Анонимный участник" : userLabel(c.fromUser),
       content: c.content,
+      isAnon: c.isAnon,
     }));
   }
 
@@ -87,7 +95,7 @@ export default async function TeamFeedbackPage({
         </div>
       ) : (
         <div className="max-w-3xl">
-          <FeedbackPanel items={feedbackItems} />
+          <FeedbackPanel items={feedbackItems} totalCount={totalFeedbackCount} />
         </div>
       )}
     </div>

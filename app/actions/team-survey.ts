@@ -47,7 +47,7 @@ export async function assignSurveyToTeam(teamId: number, sampleSurveyId: number)
     },
   });
 
-  revalidatePath(`/dashboard/teams/${teamId}/members`);
+  revalidatePath(`/dashboard/teams/${teamId}/surveys`);
   revalidatePath("/dashboard/surveys");
   return { success: true };
 }
@@ -84,6 +84,6 @@ export async function ensureDefaultSurveyTemplates(teamId: number) {
     });
   }
 
-  revalidatePath(`/dashboard/teams/${teamId}/members`);
+  revalidatePath(`/dashboard/teams/${teamId}/surveys`);
   return { success: true, created: toCreate.length };
 }

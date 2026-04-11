@@ -30,17 +30,28 @@ function expiresAt(createdAt: Date) {
   return new Date(createdAt.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
 }
 
-export async function getActiveSurveys(): Promise<ActiveSurveyDto[]> {
+export async function getActiveSurveys(teamId?: number): Promise<ActiveSurveyDto[]> {
   const user = await getCurrentUser();
   if (!user) return [];
 
-  const userTeams = await prisma.userTeam.findMany({
-    where: { userId: user.id },
-    select: { teamId: true },
-  });
+  let teamIds: number[] = [];
+  if (typeof teamId === "number" && Number.isFinite(teamId)) {
+    const membership = await prisma.userTeam.findUnique({
+      where: { userId_teamId: { userId: user.id, teamId } },
+      select: { teamId: true },
+    });
 
-  const teamIds = userTeams.map((ut) => ut.teamId);
-  if (teamIds.length === 0) return [];
+    if (!membership) return [];
+    teamIds = [teamId];
+  } else {
+    const userTeams = await prisma.userTeam.findMany({
+      where: { userId: user.id },
+      select: { teamId: true },
+    });
+
+    teamIds = userTeams.map((ut) => ut.teamId);
+    if (teamIds.length === 0) return [];
+  }
 
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -69,17 +80,30 @@ export async function getActiveSurveys(): Promise<ActiveSurveyDto[]> {
   }));
 }
 
-export async function getCompletedSurveys(): Promise<CompletedSurveyDto[]> {
+export async function getCompletedSurveys(
+  teamId?: number,
+): Promise<CompletedSurveyDto[]> {
   const user = await getCurrentUser();
   if (!user) return [];
 
-  const userTeams = await prisma.userTeam.findMany({
-    where: { userId: user.id },
-    select: { teamId: true },
-  });
+  let teamIds: number[] = [];
+  if (typeof teamId === "number" && Number.isFinite(teamId)) {
+    const membership = await prisma.userTeam.findUnique({
+      where: { userId_teamId: { userId: user.id, teamId } },
+      select: { teamId: true },
+    });
 
-  const teamIds = userTeams.map((ut) => ut.teamId);
-  if (teamIds.length === 0) return [];
+    if (!membership) return [];
+    teamIds = [teamId];
+  } else {
+    const userTeams = await prisma.userTeam.findMany({
+      where: { userId: user.id },
+      select: { teamId: true },
+    });
+
+    teamIds = userTeams.map((ut) => ut.teamId);
+    if (teamIds.length === 0) return [];
+  }
 
   const teamSurveys = await prisma.teamSurvey.findMany({
     where: {
@@ -144,6 +168,7 @@ export async function submitTeamSurvey(formData: FormData) {
 
   const template = getSurveyTemplateForTitle(teamSurvey.sampleSurvey.title);
   const allowedValues = new Set(template.choices.map((c) => c.value));
+  const isAnon = formData.get("isAnon") === "on";
   let totalScore = 0;
 
   for (let i = 0; i < template.questions.length; i += 1) {
@@ -161,7 +186,7 @@ export async function submitTeamSurvey(formData: FormData) {
       teamSurveyId,
       sampleSurveyId: teamSurvey.sampleSurvey.id,
       totalScore,
-      isAnon: template.isAnon,
+      isAnon,
       sentAt: new Date(),
     },
   });

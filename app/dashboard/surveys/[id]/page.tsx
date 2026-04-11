@@ -7,6 +7,8 @@ import { submitTeamSurvey } from "@/app/dashboard/surveys/actions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 export default async function TakeSurveyPage({
   params,
@@ -81,12 +83,42 @@ export default async function TakeSurveyPage({
           </h1>
           <p className="text-sm text-muted-foreground">{teamSurvey.team.title}</p>
           <p className="text-xs text-muted-foreground">
-            {template.isAnon ? "Ответ анонимный." : "Ответ не анонимный."}
+            Вы можете отправить ответ анонимно или с раскрытием профиля.
           </p>
         </div>
 
         <form action={submitTeamSurvey} className="space-y-4">
           <input type="hidden" name="teamSurveyId" value={teamSurveyId} />
+
+          <div className="rounded-xl border border-muted/60 bg-muted/10 px-4 py-3">
+            <Label htmlFor="survey-anon">
+              <Checkbox
+                id="survey-anon"
+                name="isAnon"
+                defaultChecked={template.isAnon}
+              />
+              Отправить ответ анонимно
+            </Label>
+          </div>
+
+          <Card className="border-muted/60 bg-muted/10">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm">Шкала ответов</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="flex flex-wrap gap-2">
+                {template.choices.map((choice) => (
+                  <div
+                    key={choice.value}
+                    className="inline-flex items-center gap-2 rounded-full border border-muted/60 bg-background px-3 py-1.5 text-xs sm:text-sm"
+                  >
+                    <span className="font-semibold text-foreground">{choice.value}</span>
+                    <span className="text-muted-foreground">{choice.label}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           {template.questions.map((question, index) => (
             <Card key={index} className="border-muted/60">
@@ -99,27 +131,24 @@ export default async function TakeSurveyPage({
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="grid gap-2">
+                <div className="flex flex-wrap gap-2">
                   {template.choices.map((choice) => {
                     const inputId = `q_${teamSurveyId}_${index}_${choice.value}`;
                     return (
                       <label
                         key={choice.value}
                         htmlFor={inputId}
-                        className="flex items-center justify-between gap-3 rounded-lg border border-muted/60 bg-background px-4 py-3 text-sm hover:bg-muted/20"
+                        className="flex min-w-0 cursor-pointer items-center gap-2 rounded-full border border-muted/60 bg-background px-3 py-2 text-sm hover:bg-muted/20"
                       >
-                        <div className="flex items-center gap-3">
-                          <input
-                            id={inputId}
-                            type="radio"
-                            name={`q_${index}`}
-                            value={choice.value}
-                            required
-                            className="size-4 accent-primary"
-                          />
-                          <span className="font-medium">{choice.label}</span>
-                        </div>
-                        <Badge variant="outline" className="h-6">
+                        <input
+                          id={inputId}
+                          type="radio"
+                          name={`q_${index}`}
+                          value={choice.value}
+                          required
+                          className="size-4 accent-primary"
+                        />
+                        <Badge variant="outline" className="h-6 shrink-0">
                           {choice.value}
                         </Badge>
                       </label>

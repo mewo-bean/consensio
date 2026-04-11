@@ -37,9 +37,11 @@ export function SurveyCard({ survey }: { survey: SurveyListItem }) {
     >
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1 min-w-0">
-            <CardTitle className="text-base sm:text-lg truncate">{survey.title}</CardTitle>
-            <CardDescription className="text-sm truncate">
+          <div className="min-w-0 flex-1 space-y-1">
+            <CardTitle className="line-clamp-2 break-words text-base leading-tight sm:text-lg">
+              {survey.title}
+            </CardTitle>
+            <CardDescription className="truncate text-sm">
               {survey.teamTitle}
             </CardDescription>
             <CardDescription className="flex items-center gap-2">
@@ -48,7 +50,7 @@ export function SurveyCard({ survey }: { survey: SurveyListItem }) {
             </CardDescription>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex shrink-0 items-center gap-2 self-start">
             {isCompleted ? (
               <Badge className="gap-1 bg-primary/10 text-primary border-primary/20">
                 <CheckCircle2Icon className="size-3" />
@@ -66,19 +68,23 @@ export function SurveyCard({ survey }: { survey: SurveyListItem }) {
 
       <CardContent className="flex items-center justify-between gap-3">
         {isCompleted ? (
-          <div className="text-sm text-muted-foreground">
+          <div className="min-w-0 text-sm text-muted-foreground">
             Ваш результат:{" "}
             <span className="font-semibold text-foreground">
               {typeof survey.userScore === "number" ? survey.userScore : "—"}
             </span>
           </div>
         ) : (
-          <div className="text-sm text-muted-foreground">
+          <div className="min-w-0 text-sm text-muted-foreground">
             Назначен: {new Date(survey.createdAt).toLocaleDateString("ru-RU")}
           </div>
         )}
 
-        <Button asChild variant={isCompleted ? "outline" : "default"} className="gap-2">
+        <Button
+          asChild
+          variant={isCompleted ? "outline" : "default"}
+          className="shrink-0 gap-2"
+        >
           <Link href={`/dashboard/surveys/${survey.id}`}>
             {isCompleted ? "Открыть" : "Пройти"}
             <ArrowRightIcon className="size-4" />

@@ -24,18 +24,20 @@ export type CompletedSurveyItem = {
 export function SurveysTab({
   initialActiveSurveys,
   initialCompletedSurveys,
+  title = "Опросы",
+  description = "Назначенные опросы и история ваших ответов.",
 }: {
   initialActiveSurveys: ActiveSurveyItem[];
   initialCompletedSurveys: CompletedSurveyItem[];
+  title?: string;
+  description?: string;
 }) {
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Опросы</h1>
-          <p className="text-sm text-muted-foreground">
-            Назначенные опросы и история ваших ответов.
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          <p className="text-sm text-muted-foreground">{description}</p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="secondary">Активных: {initialActiveSurveys.length}</Badge>
@@ -102,4 +104,3 @@ export function SurveysTab({
     </div>
   );
 }
-

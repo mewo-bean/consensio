@@ -10,6 +10,7 @@ import {
   MessageSquareQuote,
   ChevronDown,
   PlusCircle,
+  Send,
 } from "lucide-react";
 import { useState } from "react";
 import { Sidebar as SidebarBase } from "@/components/ui/sidebar";
@@ -25,8 +26,6 @@ export function Sidebar({ teams }: SidebarProps) {
   const [isTeamsOpen, setIsTeamsOpen] = useState(true);
   const currentTeamId = pathname.split("/")[3];
   const currentTeam = teams.find((t) => t.id.toString() === currentTeamId);
-  const isManager = currentTeam?.role === "manager";
-
   // ✨ 1. Добавляем мобильные стили прямо в базовый класс ссылок
   const navLinkClass = (path: string) =>
     cn(
@@ -148,6 +147,14 @@ export function Sidebar({ teams }: SidebarProps) {
               >
                 <MessageSquareQuote className="size-4 shrink-0 text-purple-400" />
                 <span>Обратная связь</span>
+              </Link>
+
+              <Link
+                href={`/dashboard/teams/${currentTeamId}/surveys`}
+                className={navLinkClass(`/dashboard/teams/${currentTeamId}/surveys`)}
+              >
+                <Send className="size-4 shrink-0 text-emerald-500" />
+                <span>Опросы</span>
               </Link>
             </div>
           )}

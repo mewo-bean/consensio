@@ -10,15 +10,20 @@ export type FeedbackItem = {
   userLabel: string;
   content: string;
   createdAt?: string;
+  isAnon?: boolean;
 };
 
 export function FeedbackPanel({
   items,
+  totalCount,
 }: {
   items: FeedbackItem[];
+  totalCount?: number;
 }) {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [expandedIds, setExpandedIds] = React.useState<Set<number>>(() => new Set());
+  const visibleCount = items.length;
+  const countLabel = typeof totalCount === "number" ? totalCount : visibleCount;
 
   const toggle = (id: number) => {
     setExpandedIds((current) => {
@@ -39,7 +44,7 @@ export function FeedbackPanel({
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <Badge variant="secondary" className="h-6">
-              {items.length}
+              {countLabel}
             </Badge>
             <Button
               type="button"
@@ -47,7 +52,7 @@ export function FeedbackPanel({
               variant="ghost"
               onClick={() => setIsCollapsed((v) => !v)}
               className="h-7 px-2"
-              disabled={items.length === 0}
+              disabled={visibleCount === 0}
             >
               {isCollapsed ? "Показать все" : "Только последняя"}
             </Button>
@@ -55,7 +60,7 @@ export function FeedbackPanel({
         </div>
       </CardHeader>
       <CardContent className="p-4 space-y-2">
-        {items.length > 0 ? (
+        {visibleCount > 0 ? (
           (isCollapsed ? items.slice(0, 1) : items).map((item) => {
             const isExpanded = expandedIds.has(item.id);
             const lines = item.content.split("\n").length;
@@ -86,6 +91,11 @@ export function FeedbackPanel({
                   <div className="font-semibold text-sm truncate">
                     {item.userLabel}
                   </div>
+                  {item.isAnon ? (
+                    <Badge variant="outline" className="h-6 shrink-0">
+                      Анонимно
+                    </Badge>
+                  ) : null}
                 </div>
                 <div
                   className={[

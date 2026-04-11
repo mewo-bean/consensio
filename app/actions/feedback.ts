@@ -4,7 +4,11 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 
-export async function submitTeamFeedback(teamId: number, content: string) {
+export async function submitTeamFeedback(
+  teamId: number,
+  content: string,
+  isAnon: boolean,
+) {
   const user = await getCurrentUser();
   if (!user) return { error: "Не авторизован" };
 
@@ -36,7 +40,7 @@ export async function submitTeamFeedback(teamId: number, content: string) {
       toUserId: primaryManager.userId,
       teamId,
       content: trimmed,
-      isAnon: false,
+      isAnon,
     },
   });
 
