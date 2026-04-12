@@ -39,7 +39,14 @@ export async function getAnalytics(days: number = 90, targetTeamId?: number) {
             sentAt: { gte: startDate },
             teamSurvey: {
                 teamId: { in: teamIds }
-            }
+            },
+            user: {
+                teams: {
+                    some: {
+                        role: 'member'
+                    }
+                }
+            },
         },
         include: {
             sampleSurvey: { select: { title: true } }
