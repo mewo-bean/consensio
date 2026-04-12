@@ -32,7 +32,7 @@ export function SectionCards({ metrics }: MetricsProps) {
           </div>
         </div>
         <p className="text-[10px] sm:text-sm text-muted-foreground mt-3 sm:mt-4 leading-tight truncate">
-          Из {data.totalEmployees}
+          Для {data.totalEmployees*2} выданных опросов
         </p>
       </Card>
 

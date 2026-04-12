@@ -3,31 +3,44 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 
-export async function getMetrics() {
+export async function getMetrics(targetTeamId?: number) {
     const session = await auth()
     if (!session?.user?.id) return null
 
     const userId = parseInt(session.user.id)
 
-    // 1. Находим ВСЕ команды, в которых состоит пользователь (любая роль)
-    const userTeams = await prisma.userTeam.findMany({
-        where: { userId: userId },
-        select: { teamId: true }
-    })
+    let teamIds: number[] = [];
 
-    const teamIds = userTeams.map(t => t.teamId)
+    if (targetTeamId) {
+        const membership = await prisma.userTeam.findFirst({
+            where: {
+                userId: userId,
+                teamId: targetTeamId
+            }
+        });
+        if (!membership) throw new Error("Нет доступа к команде");
+        teamIds = [targetTeamId];
+    } else {
+        // берем все команды юзера, если id не указали
+        const userTeams = await prisma.userTeam.findMany({
+            where: { userId: userId },
+            select: { teamId: true }
+        });
+        teamIds = userTeams.map(ut => ut.teamId);
+    }
 
-    // Если пользователь не привязан ни к одной команде
     if (teamIds.length === 0) return null
 
-    // 2. Окно времени (8 дней, чтобы точно захватить данные сида)
     const now = new Date()
     const windowStart = new Date()
     windowStart.setDate(now.getDate() - 8)
 
     // 3. Считаем общее кол-во сотрудников в этих командах
     const totalEmployees = await prisma.userTeam.count({
-        where: { teamId: { in: teamIds } }
+        where: {
+            teamId: { in: teamIds },
+            role: 'member'
+        }
     })
 
     // 4. Получаем запуски опросов для этих команд
@@ -42,7 +55,15 @@ export async function getMetrics() {
     const results = await prisma.surveyResult.findMany({
         where: {
             teamSurvey: { teamId: { in: teamIds } },
-            sentAt: { gte: windowStart }
+            sentAt: { gte: windowStart },
+            user: {
+                teams: {
+                    some: {
+                        teamId: { in: teamIds },
+                        role: 'member'
+                    }
+                }
+            }
         },
         include: {
             sampleSurvey: { select: { title: true } }

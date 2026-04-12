@@ -3,18 +3,31 @@
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/auth"
 
-export async function getAnalytics(days: number = 90) {
+export async function getAnalytics(days: number = 90, targetTeamId?: number) {
     const session = await auth()
     if (!session?.user?.id) throw new Error("Unauthorized")
 
     const userId = parseInt(session.user.id, 10);
 
-    const userTeams = await prisma.userTeam.findMany({
-        where: { userId: userId },
-        select: { teamId: true }
-    })
+    let teamIds: number[] = [];
 
-    const teamIds = userTeams.map(ut => ut.teamId)
+    if (targetTeamId) {
+        const membership = await prisma.userTeam.findFirst({
+            where: {
+                userId: userId,
+                teamId: targetTeamId
+            }
+        });
+        if (!membership) throw new Error("Нет доступа к команде");
+        teamIds = [targetTeamId];
+    } else {
+        // берем все команды юзера, если id не указали
+        const userTeams = await prisma.userTeam.findMany({
+            where: { userId: userId },
+            select: { teamId: true }
+        });
+        teamIds = userTeams.map(ut => ut.teamId);
+    }
 
     if (teamIds.length === 0) return []
 
