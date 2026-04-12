@@ -41,17 +41,27 @@ export async function sendWebPushToTeam(title: string, body: string, teamId: num
 }
 
 export async function sendWebPushToUser(userId: number, title: string, body: string, url: string = '/') {
-    const subscription = await prisma.webPushSubscription.findUnique({ where: { userId } });
-    if (!subscription) return;
+    const subscriptions = await prisma.webPushSubscription.findMany({
+        where: { userId },
+    });
+    if (subscriptions.length === 0) return;
 
-    const pushSubscription = {
-        endpoint: subscription.endpoint,
-        keys: { p256dh: subscription.p256dhKey, auth: subscription.authKey }
-    };
-    const payload = JSON.stringify({ title, body, url: url || '/' });
-    try {
-        await webpush.sendNotification(pushSubscription, payload);
-    } catch (err: unknown) {
-        console.error(err);
+    const payload = JSON.stringify({ title, body, url });
+
+    for (const sub of subscriptions) {
+        const pushSubscription = {
+            endpoint: sub.endpoint,
+            keys: { p256dh: sub.p256dhKey, auth: sub.authKey },
+        };
+        try {
+            await webpush.sendNotification(pushSubscription, payload);
+        } catch (err: any) {
+            if (err.statusCode === 410 || err.statusCode === 404) {
+                await prisma.webPushSubscription.delete({ where: { id: sub.id } });
+                console.log(`Removed expired subscription for user ${userId}, endpoint ${sub.endpoint}`);
+            } else {
+                console.error(`Failed to send push to user ${userId}, device ${sub.deviceName}:`, err);
+            }
+        }
     }
 }

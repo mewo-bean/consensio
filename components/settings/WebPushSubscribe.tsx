@@ -9,19 +9,18 @@ export default function WebPushSubscribe() {
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        checkSubscriptionStatus();
-    }, []);
-
     async function checkSubscriptionStatus() {
         try {
             if ('serviceWorker' in navigator && 'PushManager' in window) {
                 const registration = await navigator.serviceWorker.ready;
                 const subscription = await registration.pushManager.getSubscription();
                 setIsSubscribed(!!subscription);
+            } else {
+                setIsSubscribed(false);
             }
         } catch (error) {
             console.error(error);
+            setIsSubscribed(false);
         } finally {
             setLoading(false);
         }
@@ -44,22 +43,27 @@ export default function WebPushSubscribe() {
                 applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
             });
 
-            const res = await fetch('/api/webpush/subscribe', {
+            const userAgent = navigator.userAgent;
+            const res = await fetch('/api/webpush/devices', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify(subscription),
+                body: JSON.stringify({subscription, userAgent}),
+
             });
-            if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
+
+            if (!res.ok) throw new Error('Server error');
 
             setIsSubscribed(true);
             toast.success('Вы подписаны на веб-уведомления');
+            window.dispatchEvent(new Event('subscription-changed'));
         } catch (err) {
-            toast.error('Не удалось подписаться');
             console.error(err);
+            toast.error('Не удалось подписаться');
+            // откатываем подписку в браузере при ошибке
+            const registration = await navigator.serviceWorker.ready;
+            const sub = await registration.pushManager.getSubscription();
+            if (sub) await sub.unsubscribe();
         } finally {
             setLoading(false);
         }
@@ -72,14 +76,26 @@ export default function WebPushSubscribe() {
             const subscription = await registration.pushManager.getSubscription();
             if (subscription) {
                 await subscription.unsubscribe();
+                setIsSubscribed(false);
+
+                const endpoint = subscription.endpoint;
+                const res = await fetch('/api/webpush/devices', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ endpoint }),
+                });
+
+                if (!res.ok) throw new Error('Failed to delete on server');
+
+                toast.success('Вы отписались от веб-уведомлений');
+                window.dispatchEvent(new Event('subscription-changed'));
+            } else {
+                setIsSubscribed(false);
             }
-            const res = await fetch('/api/webpush/subscribe', { method: 'DELETE' });
-            if (!res.ok) throw new Error();
-            setIsSubscribed(false);
-            toast.success('Вы отписались от веб-уведомлений');
         } catch (err) {
-            toast.error('Не удалось отписаться');
             console.error(err);
+            toast.error('Не удалось отписаться');
         } finally {
             setLoading(false);
         }
@@ -95,6 +111,13 @@ export default function WebPushSubscribe() {
         }
         return outputArray;
     }
+
+    useEffect(() => {
+        checkSubscriptionStatus();
+
+        window.addEventListener('subscription-changed', () => checkSubscriptionStatus());
+        return () => window.removeEventListener('subscription-changed', () => checkSubscriptionStatus());
+    }, []);
 
     if (loading) {
         return <Loader2 className="h-4 w-4 animate-spin" />;
