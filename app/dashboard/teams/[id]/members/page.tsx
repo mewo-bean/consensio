@@ -132,7 +132,9 @@ export default async function TeamPage({
                             </span>
                           </>
                         )}
-                        <span>{member.user.email}</span>
+                        <a href={`mailto:${member.user.email}`} className="text-muted-foreground/80 hover:underline">
+                          {member.user.email}
+                        </a>
                       </div>
                     </div>
                   </div>

@@ -12,7 +12,7 @@ import {
 import { BellRing } from "lucide-react";
 import NotificationSettings from "./NotificationSettings";
 
-const excludedPaths = ["/login", "/register"];
+const excludedPaths = ["/", "/login", "/register"];
 
 export default function SettingsFloatingButton() {
   const pathname = usePathname();

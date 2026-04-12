@@ -9,12 +9,26 @@ export async function POST() {
     if (!session?.user?.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const userId = Number.parseInt(session.user.id);
+
+    const settings = await prisma.notificationSettings.findUnique({
+        where: { userId: userId }
+    });
+
+    if (settings) {
+        await prisma.notificationSettings.update({
+            where: { userId: userId },
+            data: { notifyViaTg: true }
+        });
+
+        return NextResponse.json({ success: true });
+    }
 
     const token = crypto.randomBytes(32).toString('hex');
 
     await prisma.telegramLinkToken.create({
         data: {
-            userId: Number.parseInt(session.user.id),
+            userId: userId,
             token: token,
             expiresAt: new Date(Date.now() + 5 * 60 * 1000),
         }

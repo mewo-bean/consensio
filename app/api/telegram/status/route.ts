@@ -10,7 +10,17 @@ export async function GET() {
     const userId = parseInt(session.user.id);
     const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { tgId: true },
+        select: { tgId: true }
     });
-    return NextResponse.json({ linked: !!user?.tgId });
+
+    if (user) {
+        const settings = await prisma.notificationSettings.findUnique({
+            where: { userId: userId },
+            select: { notifyViaTg: true }
+        });
+
+        return NextResponse.json({ linked: !!settings?.notifyViaTg });
+    }
+
+    return NextResponse.json({ linked: false });
 }
