@@ -11,7 +11,7 @@ export default async function DashboardHomePage() {
   if (!user) redirect("/login");
 
   return (
-    <div className="flex-1 bg-white flex flex-col pt-6 pb-20">
+    <div className="flex-1 bg-background flex flex-col pt-6 pb-20">
       <div className="px-4 sm:px-6 lg:px-8">
         <PageHeader title="Главная">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
@@ -76,7 +76,7 @@ function Feature({
 }) {
   return (
     <div className="space-y-3 p-4">
-      <div className="size-10 rounded-xl bg-white shadow-sm border flex items-center justify-center">
+      <div className="size-10 rounded-xl bg-background shadow-sm border flex items-center justify-center">
         {icon}
       </div>
       <h4 className="font-bold text-lg">{title}</h4>

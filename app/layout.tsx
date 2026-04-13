@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SessionProvider } from "next-auth/react";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -38,11 +39,14 @@ export default function RootLayout({
         "font-sans",
         inter.variable,
       )}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <SessionProvider>
           <TooltipProvider>{children}</TooltipProvider>
         </SessionProvider>
+      </ThemeProvider>
       </body>
     </html>
   );

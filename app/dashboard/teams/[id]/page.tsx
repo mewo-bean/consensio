@@ -49,7 +49,7 @@ export default function TeamDashboardPage() {
     }, [timeRange, teamId]);
 
     return (
-        <div className="flex-1 bg-white flex flex-col pt-6 pb-20">
+        <div className="flex-1 bg-background flex flex-col pt-6 pb-20">
             <div className="px-4 sm:px-6 lg:px-8">
                 <PageHeader
                     title="Дашборд"

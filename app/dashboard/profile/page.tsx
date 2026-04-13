@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { User, Mail } from 'lucide-react';
 import NotificationSettings from '@/components/settings/NotificationSettings';
 import LogoutButton from '@/components/settings/LogoutButton';
+import { ModeToggle } from "@/components/settings/ModeToggle";
 
 export default async function ProfilePage() {
     const session = await auth();
@@ -31,6 +32,8 @@ export default async function ProfilePage() {
             </Card>
 
             <NotificationSettings/>
+
+            <ModeToggle/>
 
             <div className="mt-8 flex justify-end">
                 <LogoutButton/>
