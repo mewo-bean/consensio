@@ -113,6 +113,10 @@ export default function WebPushSubscribe() {
     }
 
     useEffect(() => {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+
         checkSubscriptionStatus();
 
         window.addEventListener('subscription-changed', () => checkSubscriptionStatus());

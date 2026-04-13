@@ -10,6 +10,7 @@ import {
   MessageSquareQuote,
   ChevronDown,
   PlusCircle,
+  CircleUser,
 } from "lucide-react";
 import { useState } from "react";
 import { Sidebar as SidebarBase } from "@/components/ui/sidebar";
@@ -49,6 +50,14 @@ export function Sidebar({ teams }: SidebarProps) {
 
         <nav className="flex flex-col gap-2 w-full">
           <div>
+            <Link
+                href="/dashboard/profile"
+                className={navLinkClass("/dashboard/profile")}
+            >
+              <CircleUser className="size-4 shrink-0 text-purple-400" />
+              <span>Профиль</span>
+            </Link>
+
             <button
               onClick={() => setIsTeamsOpen(!isTeamsOpen)}
               className={cn(
@@ -57,7 +66,7 @@ export function Sidebar({ teams }: SidebarProps) {
               )}
             >
               <div className="flex items-center gap-3">
-                <Users className="size-4 shrink-0 text-purple-500" />
+                <Users className="size-4 shrink-0 text-purple-400" />
                 <span>Мои группы</span>
               </div>
               <ChevronDown
