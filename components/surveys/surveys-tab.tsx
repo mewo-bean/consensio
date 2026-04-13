@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { SurveyCard } from "@/components/surveys/survey-card";
+import { PageHeader } from "@/components/layout/page-header";
 
 export type ActiveSurveyItem = {
   id: number;
@@ -34,15 +35,11 @@ export function SurveysTab({
 }) {
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-          <p className="text-sm text-muted-foreground">{description}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary">Активных: {initialActiveSurveys.length}</Badge>
-          <Badge variant="outline">Пройдено: {initialCompletedSurveys.length}</Badge>
-        </div>
+      <PageHeader title={title} description={description} />
+
+      <div className="flex items-center gap-2">
+        <Badge variant="secondary">Активных: {initialActiveSurveys.length}</Badge>
+        <Badge variant="outline">Пройдено: {initialCompletedSurveys.length}</Badge>
       </div>
 
       <section className="space-y-4">

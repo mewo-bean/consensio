@@ -4,8 +4,6 @@ import { getCurrentUser } from "@/lib/auth";
 import { getActiveSurveys, getCompletedSurveys } from "@/app/dashboard/surveys/actions";
 import { SurveysTab } from "@/components/surveys/surveys-tab";
 import { PageHeader } from "@/components/layout/page-header";
-import { DeleteTeamButton } from "@/components/teams/delete-team-button";
-import { LeaveTeamButton } from "@/components/teams/leave-team-button";
 import { AssignSurveyCard } from "@/components/teams/assign-survey-card";
 import { TeamSurveysOverview } from "@/components/teams/team-surveys-overview";
 
@@ -52,10 +50,7 @@ export default async function TeamSurveysPage({
         <PageHeader
           title="Опросы"
           description="Назначайте опросы этой команде и следите за последними запусками."
-        >
-          <LeaveTeamButton teamId={teamId} />
-          <DeleteTeamButton teamId={teamId} />
-        </PageHeader>
+        />
 
         <div className="grid grid-cols-1 gap-8 items-start lg:grid-cols-3">
           <div className="lg:sticky lg:top-6">

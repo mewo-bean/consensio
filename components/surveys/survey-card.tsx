@@ -42,7 +42,7 @@ export function SurveyCard({ survey }: { survey: SurveyListItem }) {
               {survey.title}
             </CardTitle>
             <CardDescription className="truncate text-sm">
-              {survey.teamTitle}
+              От команды: {survey.teamTitle}
             </CardDescription>
             <CardDescription className="flex items-center gap-2">
               <UsersIcon className="size-3" />

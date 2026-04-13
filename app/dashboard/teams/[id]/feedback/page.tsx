@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { FeedbackInput } from "@/components/teams/feedback-input";
 import { FeedbackPanel, type FeedbackItem } from "@/components/teams/feedback-panel";
+import { PageHeader } from "@/components/layout/page-header";
 
 function userLabel(user: {
   firstName: string | null;
@@ -37,7 +38,7 @@ export default async function TeamFeedbackPage({
 
   const team = await prisma.team.findUnique({
     where: { id: teamId },
-    select: { id: true },
+    select: { id: true, title: true },
   });
 
   if (!team) redirect("/dashboard");
@@ -89,6 +90,15 @@ export default async function TeamFeedbackPage({
 
   return (
     <div className="flex-1 w-full pt-6 px-4 sm:px-6 lg:px-8 pb-20">
+      <PageHeader
+        title="Обратная связь"
+        description={
+          membership.role === "manager"
+            ? `Сообщения от участников команды «${team.title}».`
+            : `Оставьте сообщение для команды «${team.title}».`
+        }
+      />
+
       {membership.role !== "manager" ? (
         <div className="max-w-2xl">
           <FeedbackInput teamId={teamId} />
