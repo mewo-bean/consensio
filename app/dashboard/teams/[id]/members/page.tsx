@@ -30,7 +30,9 @@ export default async function TeamPage({
 
   const team = await prisma.team.findUnique({
     where: { id: teamId },
-    include: { members: { include: { user: true } } },
+    include: {
+      members: { include: { user: true } },
+    },
   });
 
   if (!team) redirect("/dashboard");
@@ -49,38 +51,40 @@ export default async function TeamPage({
         {isManager && <DeleteTeamButton teamId={teamId} />}
       </PageHeader>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <Card className="lg:sticky lg:top-6 shadow-sm overflow-hidden border-muted/60">
-          <CardHeader className="bg-muted/30 pb-4">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Hash className="size-4 text-primary" />
-              Инвайт-код
-            </CardTitle>
-            <CardDescription>
-              Используйте ID для добавления коллег
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-6 space-y-4">
-            {isManager ? (
-              <>
-                <div className="flex flex-col items-center justify-center p-4 bg-muted/50 rounded-xl border-2 border-dashed border-muted-foreground/20">
-                  <span className="text-xs uppercase font-bold tracking-widest text-muted-foreground mb-1">
-                    ID команды
-                  </span>
-                  <span className="text-3xl font-black text-primary tracking-tighter">
-                    {team.id}
-                  </span>
+        <div className="lg:sticky lg:top-6 space-y-6">
+          <Card className="shadow-sm overflow-hidden border-muted/60">
+            <CardHeader className="bg-muted/30 pb-4">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Hash className="size-4 text-primary" />
+                Инвайт-код
+              </CardTitle>
+              <CardDescription>
+                Используйте ID для добавления коллег
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              {isManager ? (
+                <>
+                  <div className="flex flex-col items-center justify-center p-4 bg-muted/50 rounded-xl border-2 border-dashed border-muted-foreground/20">
+                    <span className="text-xs uppercase font-bold tracking-widest text-muted-foreground mb-1">
+                      ID команды
+                    </span>
+                    <span className="text-3xl font-black text-primary tracking-tighter">
+                      {team.id}
+                    </span>
+                  </div>
+                  <CopyInviteButton teamId={team.id} />
+                </>
+              ) : (
+                <div className="text-center py-6 px-2">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Только администраторы могут создавать приглашения.
+                  </p>
                 </div>
-                <CopyInviteButton teamId={team.id} />
-              </>
-            ) : (
-              <div className="text-center py-6 px-2">
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Только администраторы могут создавать приглашения.
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
         <Card className="lg:col-span-2 shadow-sm border-muted/60">
           <CardHeader className="border-b border-muted/50 pb-4">

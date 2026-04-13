@@ -1,6 +1,5 @@
 "use client";
 
-import {useState} from "react";
 import {ChartAreaInteractive} from "@/components/chart-area-interactive";
 import {SectionCards} from "@/components/section-cards";
 import {PageHeader} from "@/components/layout/page-header";
@@ -36,12 +35,14 @@ export default function TeamDashboardPage() {
     const teamId = params.id ? parseInt(params.id as string, 10) : undefined;
 
     React.useEffect(() => {
+        if (!teamId) return;
         getMetrics(teamId)
             .then(setMetrics)
             .catch(console.error);
     }, [teamId]);
 
     React.useEffect(() => {
+        if (!teamId) return;
         const days = parseInt(timeRange);
         getAnalytics(days, teamId)
             .then(setData)

@@ -11,6 +11,7 @@ import {
   ChevronDown,
   PlusCircle,
   CircleUser,
+  Send,
 } from "lucide-react";
 import { useState } from "react";
 import { Sidebar as SidebarBase } from "@/components/ui/sidebar";
@@ -148,17 +149,21 @@ export function Sidebar({ teams }: SidebarProps) {
                 <span>Участники группы</span>
               </Link>
 
-              {isManager && (
-                <Link
-                  href={`/dashboard/teams/${currentTeamId}/feedback`}
-                  className={navLinkClass(
-                    `/dashboard/teams/${currentTeamId}/feedback`,
-                  )}
-                >
-                  <MessageSquareQuote className="size-4 shrink-0 text-purple-400" />
-                  <span>Обратная связь</span>
-                </Link>
-              )}
+              <Link
+                href={`/dashboard/teams/${currentTeamId}/feedback`}
+                className={navLinkClass(`/dashboard/teams/${currentTeamId}/feedback`)}
+              >
+                <MessageSquareQuote className="size-4 shrink-0 text-purple-400" />
+                <span>Обратная связь</span>
+              </Link>
+
+              <Link
+                href={`/dashboard/teams/${currentTeamId}/surveys`}
+                className={navLinkClass(`/dashboard/teams/${currentTeamId}/surveys`)}
+              >
+                <Send className="size-4 shrink-0 text-emerald-500" />
+                <span>Опросы</span>
+              </Link>
             </div>
           )}
         </nav>
