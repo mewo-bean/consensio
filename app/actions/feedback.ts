@@ -7,7 +7,6 @@ import { getCurrentUser } from "@/lib/auth";
 export async function submitTeamFeedback(
   teamId: number,
   content: string,
-  isAnon: boolean,
 ) {
   const user = await getCurrentUser();
   if (!user) return { error: "Не авторизован" };
@@ -40,7 +39,7 @@ export async function submitTeamFeedback(
       toUserId: primaryManager.userId,
       teamId,
       content: trimmed,
-      isAnon,
+      isAnon: true,
     },
   });
 

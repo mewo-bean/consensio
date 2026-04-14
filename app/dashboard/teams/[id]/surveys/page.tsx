@@ -1,7 +1,11 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { getActiveSurveys, getCompletedSurveys } from "@/app/dashboard/surveys/actions";
+import {
+  getActiveSurveys,
+  getCompletedSurveys,
+  getExpiredSurveys,
+} from "@/app/dashboard/surveys/actions";
 import { SurveysTab } from "@/components/surveys/surveys-tab";
 import { PageHeader } from "@/components/layout/page-header";
 import { AssignSurveyCard } from "@/components/teams/assign-survey-card";
@@ -71,17 +75,19 @@ export default async function TeamSurveysPage({
     );
   }
 
-  const [activeSurveys, completedSurveys] = await Promise.all([
+  const [activeSurveys, completedSurveys, expiredSurveys] = await Promise.all([
     getActiveSurveys(teamId),
     getCompletedSurveys(teamId),
+    getExpiredSurveys(teamId),
   ]);
 
   return (
     <SurveysTab
       initialActiveSurveys={activeSurveys}
       initialCompletedSurveys={completedSurveys}
+      initialExpiredSurveys={expiredSurveys}
       title="Опросы команды"
-      description={`Назначенные опросы и история ваших ответов для команды «${team.title}».`}
+      description={`Назначенные опросы и история ваших ответов для команды «${team.title}». Все опросы проходят анонимно.`}
     />
   );
 }

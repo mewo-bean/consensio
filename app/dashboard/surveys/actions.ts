@@ -26,6 +26,15 @@ export type CompletedSurveyDto = {
   sentAt: string;
 };
 
+export type ExpiredSurveyDto = {
+  id: number;
+  title: string;
+  teamTitle: string;
+  createdAt: string;
+  expiresAt: string;
+  totalResponses: number;
+};
+
 function expiresAt(createdAt: Date) {
   return new Date(createdAt.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
 }
@@ -134,6 +143,56 @@ export async function getCompletedSurveys(
   }));
 }
 
+export async function getExpiredSurveys(teamId?: number): Promise<ExpiredSurveyDto[]> {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
+  let teamIds: number[] = [];
+  if (typeof teamId === "number" && Number.isFinite(teamId)) {
+    const membership = await prisma.userTeam.findUnique({
+      where: { userId_teamId: { userId: user.id, teamId } },
+      select: { teamId: true },
+    });
+
+    if (!membership) return [];
+    teamIds = [teamId];
+  } else {
+    const userTeams = await prisma.userTeam.findMany({
+      where: { userId: user.id },
+      select: { teamId: true },
+    });
+
+    teamIds = userTeams.map((ut) => ut.teamId);
+    if (teamIds.length === 0) return [];
+  }
+
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  const teamSurveys = await prisma.teamSurvey.findMany({
+    where: {
+      teamId: { in: teamIds },
+      createdAt: { lt: oneWeekAgo },
+      surveyResults: { none: { userId: user.id } },
+    },
+    include: {
+      sampleSurvey: { select: { title: true } },
+      team: { select: { title: true } },
+      _count: { select: { surveyResults: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return teamSurveys.map((ts) => ({
+    id: ts.id,
+    title: ts.sampleSurvey.title,
+    teamTitle: ts.team.title,
+    createdAt: ts.createdAt.toISOString(),
+    expiresAt: expiresAt(ts.createdAt),
+    totalResponses: ts._count.surveyResults,
+  }));
+}
+
 export async function submitTeamSurvey(formData: FormData) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
@@ -157,6 +216,10 @@ export async function submitTeamSurvey(formData: FormData) {
 
   if (!membership) throw new Error("Нет доступа к опросу");
 
+  if (new Date(teamSurvey.createdAt).getTime() + 7 * 24 * 60 * 60 * 1000 <= Date.now()) {
+    throw new Error("Срок прохождения опроса истёк");
+  }
+
   const existing = await prisma.surveyResult.findFirst({
     where: { userId: user.id, teamSurveyId },
     select: { id: true },
@@ -168,7 +231,6 @@ export async function submitTeamSurvey(formData: FormData) {
 
   const template = getSurveyTemplateForTitle(teamSurvey.sampleSurvey.title);
   const allowedValues = new Set(template.choices.map((c) => c.value));
-  const isAnon = formData.get("isAnon") === "on";
   let totalScore = 0;
 
   for (let i = 0; i < template.questions.length; i += 1) {
@@ -186,7 +248,7 @@ export async function submitTeamSurvey(formData: FormData) {
       teamSurveyId,
       sampleSurveyId: teamSurvey.sampleSurvey.id,
       totalScore,
-      isAnon,
+      isAnon: true,
       sentAt: new Date(),
     },
   });

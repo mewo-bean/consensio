@@ -27,7 +27,6 @@ export function Sidebar({ teams }: SidebarProps) {
   const [isTeamsOpen, setIsTeamsOpen] = useState(true);
   const currentTeamId = pathname.split("/")[3];
   const currentTeam = teams.find((t) => t.id.toString() === currentTeamId);
-  const isManager = currentTeam?.role === "manager";
 
   const navLinkClass = (path: string) =>
     cn(
@@ -37,6 +36,12 @@ export function Sidebar({ teams }: SidebarProps) {
         ? "bg-primary/10 text-foreground border-l-4 border-primary rounded-l-none"
         : "text-muted-foreground hover:bg-muted hover:text-foreground border-l-4 border-transparent rounded-l-none",
     );
+
+  const navButtonClass = cn(
+    "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all overflow-hidden",
+    "max-sm:min-h-[44px] max-sm:py-3 max-sm:text-base",
+    "text-muted-foreground hover:bg-muted hover:text-foreground border-l-4 border-transparent rounded-l-none",
+  );
 
   return (
     <SidebarBase collapsible="offcanvas">
@@ -50,72 +55,13 @@ export function Sidebar({ teams }: SidebarProps) {
         </div>
 
         <nav className="flex flex-col gap-2 w-full">
-          <div>
-            <Link
-                href="/dashboard/profile"
-                className={navLinkClass("/dashboard/profile")}
-            >
-              <CircleUser className="size-4 shrink-0 text-purple-400" />
-              <span>Профиль</span>
-            </Link>
-
-            <button
-              onClick={() => setIsTeamsOpen(!isTeamsOpen)}
-              className={cn(
-                "flex w-full items-center justify-between px-3 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-md transition-colors",
-                "max-sm:min-h-11 max-sm:py-3 max-sm:text-base",
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <Users className="size-4 shrink-0 text-purple-400" />
-                <span>Мои группы</span>
-              </div>
-              <ChevronDown
-                className={cn(
-                  "size-4 shrink-0 transition-transform",
-                  !isTeamsOpen && "-rotate-90",
-                )}
-              />
-            </button>
-
-            {isTeamsOpen && (
-              <div className="ml-5 mt-1 flex flex-col gap-1 border-l pl-3 border-border/50">
-                {teams.length > 0 ? (
-                  teams.map((team) => (
-                    <Link
-                      key={team.id}
-                      href={`/dashboard/teams/${team.id}`}
-                      className={cn(
-                        "flex items-center gap-2 px-2 py-1.5 text-sm rounded-md transition-colors overflow-hidden",
-                        "max-sm:min-h-11 max-sm:py-3 max-sm:text-base",
-                        currentTeamId === team.id.toString()
-                          ? "text-foreground bg-muted font-medium"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted",
-                      )}
-                    >
-                      <div className="size-6 rounded-full bg-linear-to-br from-purple-200 to-green-200 shrink-0" />
-                      <span className="truncate">{team.title}</span>
-                    </Link>
-                  ))
-                ) : (
-                  <span className="text-xs text-muted-foreground px-2 py-1">
-                    Нет групп
-                  </span>
-                )}
-
-                <Link
-                  href="/dashboard/teams/new"
-                  className={cn(
-                    "flex items-center gap-2 px-2 py-1.5 mt-2 text-sm font-medium text-primary hover:bg-primary/10 rounded-md transition-colors",
-                    "max-sm:min-h-11 max-sm:py-3 max-sm:text-base",
-                  )}
-                >
-                  <PlusCircle className="size-4 shrink-0" />
-                  <span>Добавить команду</span>
-                </Link>
-              </div>
-            )}
-          </div>
+          <Link
+            href="/dashboard/profile"
+            className={navLinkClass("/dashboard/profile")}
+          >
+            <CircleUser className="size-4 shrink-0 text-purple-400" />
+            <span>Профиль</span>
+          </Link>
 
           <Link
             href="/dashboard/surveys"
@@ -124,6 +70,60 @@ export function Sidebar({ teams }: SidebarProps) {
             <ClipboardCheck className="size-4 shrink-0 text-purple-400" />
             <span>Мои опросы</span>
           </Link>
+
+          <button
+            onClick={() => setIsTeamsOpen(!isTeamsOpen)}
+            className={navButtonClass}
+          >
+            <div className="flex items-center gap-3">
+              <Users className="size-4 shrink-0 text-purple-400" />
+              <span>Мои группы</span>
+            </div>
+            <ChevronDown
+              className={cn(
+                "size-4 shrink-0 transition-transform",
+                !isTeamsOpen && "-rotate-90",
+              )}
+            />
+          </button>
+
+          {isTeamsOpen && (
+            <div className="ml-5 mt-1 flex flex-col gap-1 border-l border-border/50 pl-3">
+              {teams.length > 0 ? (
+                teams.map((team) => (
+                  <Link
+                    key={team.id}
+                    href={`/dashboard/teams/${team.id}`}
+                    className={cn(
+                      "flex items-center gap-2 px-2 py-1.5 text-sm rounded-md transition-colors overflow-hidden",
+                      "max-sm:min-h-11 max-sm:py-3 max-sm:text-base",
+                      currentTeamId === team.id.toString()
+                        ? "text-foreground bg-muted font-medium"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                    )}
+                  >
+                    <div className="size-6 rounded-full bg-linear-to-br from-purple-200 to-green-200 shrink-0" />
+                    <span className="truncate">{team.title}</span>
+                  </Link>
+                ))
+              ) : (
+                <span className="px-2 py-1 text-xs text-muted-foreground">
+                  Нет групп
+                </span>
+              )}
+
+              <Link
+                href="/dashboard/teams/new"
+                className={cn(
+                  "mt-2 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10",
+                  "max-sm:min-h-11 max-sm:py-3 max-sm:text-base",
+                )}
+              >
+                <PlusCircle className="size-4 shrink-0" />
+                <span>Добавить команду</span>
+              </Link>
+            </div>
+          )}
 
           {currentTeamId && currentTeam && (
             <div className="mt-4 flex flex-col gap-2 border-t pt-4 w-full">

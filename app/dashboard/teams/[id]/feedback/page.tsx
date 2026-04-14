@@ -89,22 +89,20 @@ export default async function TeamFeedbackPage({
   }
 
   return (
-    <div className="flex-1 w-full pt-6 px-4 sm:px-6 lg:px-8 pb-20">
+    <div className="flex-1 w-full px-4 pt-6 pb-20 sm:px-6 lg:px-8">
       <PageHeader
         title="Обратная связь"
         description={
           membership.role === "manager"
             ? `Сообщения от участников команды «${team.title}».`
-            : `Оставьте сообщение для команды «${team.title}».`
+            : `Оставьте сообщение для команды «${team.title}». Все сообщения отправляются анонимно.`
         }
       />
 
       {membership.role !== "manager" ? (
-        <div className="max-w-2xl">
-          <FeedbackInput teamId={teamId} />
-        </div>
+        <FeedbackInput teamId={teamId} />
       ) : (
-        <div className="max-w-3xl">
+        <div className="mx-auto max-w-3xl">
           <FeedbackPanel items={feedbackItems} totalCount={totalFeedbackCount} />
         </div>
       )}

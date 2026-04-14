@@ -7,8 +7,7 @@ import { submitTeamSurvey } from "@/app/dashboard/surveys/actions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/layout/page-header";
 
 export default async function TakeSurveyPage({
   params,
@@ -45,60 +44,95 @@ export default async function TakeSurveyPage({
   });
 
   const template = getSurveyTemplateForTitle(teamSurvey.sampleSurvey.title);
+  const surveyExpiresAt = new Date(
+    teamSurvey.createdAt.getTime() + 7 * 24 * 60 * 60 * 1000,
+  );
+  // eslint-disable-next-line react-hooks/purity
+  const isExpired = surveyExpiresAt.getTime() <= Date.now();
 
   if (existing) {
     return (
-      <div className="flex-1 w-full pt-6 px-4 sm:px-6 lg:px-8 pb-20">
-        <Card className="max-w-2xl">
+      <div className="flex flex-1 justify-center px-4 py-6 sm:px-6">
+        <div className="w-full max-w-3xl space-y-6">
+          <PageHeader
+            title={teamSurvey.sampleSurvey.title}
+            description={`Опрос команды «${teamSurvey.team.title}». Все ответы анонимные.`}
+          />
+
+          <Card className="mx-auto w-full max-w-2xl">
+            <CardHeader>
+              <CardTitle>{teamSurvey.sampleSurvey.title}</CardTitle>
+              <CardDescription>{teamSurvey.team.title}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="text-sm text-muted-foreground">
+                Вы уже прошли этот опрос{" "}
+                <span className="font-medium text-foreground">
+                  {new Date(existing.sentAt).toLocaleString("ru-RU")}
+                </span>
+                .
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <Badge variant="secondary">Результат: {existing.totalScore}</Badge>
+                <Button asChild variant="outline">
+                  <Link href="/dashboard/surveys">К опросам</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (isExpired) {
+    return (
+      <div className="flex flex-1 justify-center px-4 py-6 sm:px-6">
+        <div className="w-full max-w-3xl space-y-6">
+          <PageHeader
+            title={teamSurvey.sampleSurvey.title}
+            description={`Опрос команды «${teamSurvey.team.title}». Все ответы анонимные.`}
+          />
+
+          <Card className="mx-auto w-full max-w-2xl border-muted bg-muted/20">
           <CardHeader>
             <CardTitle>{teamSurvey.sampleSurvey.title}</CardTitle>
             <CardDescription>{teamSurvey.team.title}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-sm text-muted-foreground">
-              Вы уже прошли этот опрос{" "}
+              Срок прохождения этого опроса завершился{" "}
               <span className="font-medium text-foreground">
-                {new Date(existing.sentAt).toLocaleString("ru-RU")}
+                {surveyExpiresAt.toLocaleString("ru-RU")}
               </span>
               .
             </div>
             <div className="flex items-center justify-between gap-3">
-              <Badge variant="secondary">Результат: {existing.totalScore}</Badge>
+              <Badge variant="secondary">Опрос окончен</Badge>
               <Button asChild variant="outline">
                 <Link href="/dashboard/surveys">К опросам</Link>
               </Button>
             </div>
           </CardContent>
-        </Card>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 w-full pt-6 px-4 sm:px-6 lg:px-8 pb-20">
-      <div className="max-w-3xl space-y-6">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {teamSurvey.sampleSurvey.title}
-          </h1>
-          <p className="text-sm text-muted-foreground">{teamSurvey.team.title}</p>
-          <p className="text-xs text-muted-foreground">
-            Вы можете отправить ответ анонимно или с раскрытием профиля.
-          </p>
-        </div>
+    <div className="flex flex-1 justify-center px-4 py-6 sm:px-6">
+      <div className="w-full max-w-4xl space-y-6">
+        <PageHeader
+          title={teamSurvey.sampleSurvey.title}
+          description={`Опрос команды «${teamSurvey.team.title}». Все ответы анонимные.`}
+        />
 
         <form action={submitTeamSurvey} className="space-y-4">
           <input type="hidden" name="teamSurveyId" value={teamSurveyId} />
 
-          <div className="rounded-xl border border-muted/60 bg-muted/10 px-4 py-3">
-            <Label htmlFor="survey-anon">
-              <Checkbox
-                id="survey-anon"
-                name="isAnon"
-                defaultChecked={template.isAnon}
-              />
-              Отправить ответ анонимно
-            </Label>
+          <div className="rounded-xl border border-muted/60 bg-muted/10 px-4 py-3 text-sm text-muted-foreground">
+            Ответы на этот опрос отправляются анонимно автоматически.
           </div>
 
           <Card className="border-muted/60 bg-muted/10">

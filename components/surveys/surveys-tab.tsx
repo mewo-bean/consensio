@@ -22,82 +22,120 @@ export type CompletedSurveyItem = {
   sentAt: string;
 };
 
+export type ExpiredSurveyItem = {
+  id: number;
+  title: string;
+  teamTitle: string;
+  createdAt: string;
+  expiresAt: string;
+  totalResponses: number;
+};
+
 export function SurveysTab({
   initialActiveSurveys,
   initialCompletedSurveys,
+  initialExpiredSurveys,
   title = "Опросы",
-  description = "Назначенные опросы и история ваших ответов.",
+  description = "Назначенные опросы и история ваших ответов. Все опросы проходят анонимно.",
 }: {
   initialActiveSurveys: ActiveSurveyItem[];
   initialCompletedSurveys: CompletedSurveyItem[];
+  initialExpiredSurveys: ExpiredSurveyItem[];
   title?: string;
   description?: string;
 }) {
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6">
-      <PageHeader title={title} description={description} />
+    <div className="flex flex-1 justify-center px-4 py-6 sm:px-6">
+      <div className="flex w-full max-w-6xl flex-col gap-6">
+        <PageHeader title={title} description={description} />
 
-      <div className="flex items-center gap-2">
-        <Badge variant="secondary">Активных: {initialActiveSurveys.length}</Badge>
-        <Badge variant="outline">Пройдено: {initialCompletedSurveys.length}</Badge>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="secondary">Активных: {initialActiveSurveys.length}</Badge>
+          <Badge variant="outline">Пройдено: {initialCompletedSurveys.length}</Badge>
+          <Badge variant="outline">Просрочено: {initialExpiredSurveys.length}</Badge>
+        </div>
+
+        <section className="space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-lg font-medium">Активные</h2>
+            <p className="text-sm text-muted-foreground">
+              Пройдите доступные опросы, пока они открыты.
+            </p>
+          </div>
+
+          {initialActiveSurveys.length > 0 ? (
+            <div className="grid gap-4 xl:grid-cols-2">
+              {initialActiveSurveys.map((survey) => (
+                <SurveyCard
+                  key={survey.id}
+                  survey={{ ...survey, status: "active" }}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
+              Сейчас нет активных опросов.
+            </div>
+          )}
+        </section>
+
+        <section className="space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-lg font-medium">Завершённые</h2>
+            <p className="text-sm text-muted-foreground">
+              Здесь сохраняются уже пройденные вами опросы.
+            </p>
+          </div>
+
+          {initialCompletedSurveys.length > 0 ? (
+            <div className="grid gap-4 xl:grid-cols-2">
+              {initialCompletedSurveys.map((survey) => (
+                <SurveyCard
+                  key={survey.id}
+                  survey={{
+                    id: survey.id,
+                    title: survey.title,
+                    teamTitle: survey.teamTitle,
+                    createdAt: survey.createdAt,
+                    expiresAt: survey.expiresAt,
+                    totalResponses: survey.totalResponses,
+                    status: "completed",
+                    userScore: survey.userScore,
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
+              Вы ещё не проходили опросы.
+            </div>
+          )}
+        </section>
+
+        <section className="space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-lg font-medium">Просроченные</h2>
+            <p className="text-sm text-muted-foreground">
+              Эти опросы уже закрыты и больше недоступны для прохождения.
+            </p>
+          </div>
+
+          {initialExpiredSurveys.length > 0 ? (
+            <div className="grid gap-4 xl:grid-cols-2">
+              {initialExpiredSurveys.map((survey) => (
+                <SurveyCard
+                  key={survey.id}
+                  survey={{ ...survey, status: "expired" }}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
+              Просроченных опросов нет.
+            </div>
+          )}
+        </section>
       </div>
-
-      <section className="space-y-4">
-        <div className="space-y-1">
-          <h2 className="text-lg font-medium">Активные</h2>
-          <p className="text-sm text-muted-foreground">
-            Пройдите доступные опросы, пока они открыты.
-          </p>
-        </div>
-
-        {initialActiveSurveys.length > 0 ? (
-          <div className="grid gap-4 xl:grid-cols-2">
-            {initialActiveSurveys.map((survey) => (
-              <SurveyCard
-                key={survey.id}
-                survey={{ ...survey, status: "active" }}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-xl border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
-            Сейчас нет активных опросов.
-          </div>
-        )}
-      </section>
-
-      <section className="space-y-4">
-        <div className="space-y-1">
-          <h2 className="text-lg font-medium">Завершённые</h2>
-          <p className="text-sm text-muted-foreground">
-            Здесь сохраняются уже пройденные вами опросы.
-          </p>
-        </div>
-
-        {initialCompletedSurveys.length > 0 ? (
-          <div className="grid gap-4 xl:grid-cols-2">
-            {initialCompletedSurveys.map((survey) => (
-              <SurveyCard
-                key={survey.id}
-                survey={{
-                  id: survey.id,
-                  title: survey.title,
-                  teamTitle: survey.teamTitle,
-                  createdAt: survey.createdAt,
-                  expiresAt: survey.expiresAt,
-                  totalResponses: survey.totalResponses,
-                  status: "completed",
-                  userScore: survey.userScore,
-                }}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-xl border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
-            Вы ещё не проходили опросы.
-          </div>
-        )}
-      </section>
     </div>
   );
 }

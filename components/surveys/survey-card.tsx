@@ -13,7 +13,7 @@ type SurveyListItem = {
   createdAt: string;
   expiresAt: string;
   totalResponses: number;
-  status: "active" | "completed";
+  status: "active" | "completed" | "expired";
   userScore?: number | null;
 };
 
@@ -30,10 +30,15 @@ function formatTimeLeft(expiresAtIso: string) {
 export function SurveyCard({ survey }: { survey: SurveyListItem }) {
   const timeLeft = formatTimeLeft(survey.expiresAt);
   const isCompleted = survey.status === "completed";
+  const isExpired = survey.status === "expired";
 
   return (
     <Card
-      className={cn("transition-all", isCompleted && "border-primary/20 bg-muted/5")}
+      className={cn(
+        "transition-all",
+        isCompleted && "border-primary/20 bg-muted/5",
+        isExpired && "border-muted bg-muted/20",
+      )}
     >
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
@@ -56,6 +61,11 @@ export function SurveyCard({ survey }: { survey: SurveyListItem }) {
                 <CheckCircle2Icon className="size-3" />
                 Пройден
               </Badge>
+            ) : isExpired ? (
+              <Badge variant="secondary" className="gap-1 text-muted-foreground">
+                <ClockIcon className="size-3" />
+                Окончен
+              </Badge>
             ) : (
               <Badge variant="outline" className="gap-1">
                 <ClockIcon className="size-3" />
@@ -74,22 +84,32 @@ export function SurveyCard({ survey }: { survey: SurveyListItem }) {
               {typeof survey.userScore === "number" ? survey.userScore : "—"}
             </span>
           </div>
+        ) : isExpired ? (
+          <div className="min-w-0 text-sm text-muted-foreground">
+            Срок прохождения завершился: {new Date(survey.expiresAt).toLocaleDateString("ru-RU")}
+          </div>
         ) : (
           <div className="min-w-0 text-sm text-muted-foreground">
             Назначен: {new Date(survey.createdAt).toLocaleDateString("ru-RU")}
           </div>
         )}
 
-        <Button
-          asChild
-          variant={isCompleted ? "outline" : "default"}
-          className="shrink-0 gap-2"
-        >
-          <Link href={`/dashboard/surveys/${survey.id}`}>
-            {isCompleted ? "Открыть" : "Пройти"}
-            <ArrowRightIcon className="size-4" />
-          </Link>
-        </Button>
+        {isExpired ? (
+          <Button variant="secondary" disabled className="shrink-0">
+            Окончен
+          </Button>
+        ) : (
+          <Button
+            asChild
+            variant={isCompleted ? "outline" : "default"}
+            className="shrink-0 gap-2"
+          >
+            <Link href={`/dashboard/surveys/${survey.id}`}>
+              {isCompleted ? "Открыть" : "Пройти"}
+              <ArrowRightIcon className="size-4" />
+            </Link>
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
