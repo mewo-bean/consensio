@@ -15,7 +15,7 @@ export function PageHeader({
   className,
 }: PageHeaderProps) {
   return (
-    <header className={cn("border-b border-border/60 pb-6 mb-10", className)}>
+    <header className={cn("border-b border-border/60 pb-6 mb-6", className)}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4 min-w-0">
           <SidebarTrigger className="-ml-1 h-10 w-10 shrink-0 bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-lg" />

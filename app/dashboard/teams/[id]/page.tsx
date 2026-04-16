@@ -43,10 +43,7 @@ export default function TeamDashboardPage() {
 
     React.useEffect(() => {
         if (!teamId) return;
-        const days = parseInt(timeRange);
-        getAnalytics(days, teamId)
-            .then(setData)
-            .catch(console.error);
+        getAnalytics(90, teamId).then(setData).catch(console.error);
     }, [timeRange, teamId]);
 
     return (
@@ -58,14 +55,29 @@ export default function TeamDashboardPage() {
                 />
             </div>
 
-            <div className="@container/main flex flex-1 flex-col gap-2">
-                <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+            <div className="@container/main flex flex-1 flex-col">
+                <div className="flex flex-col gap-6 pb-4 md:pb-6">
                     <SectionCards metrics={metrics}/>
-                    <div className="px-4 lg:px-6">
+                    <div className="px-4 lg:px-6 flex flex-col gap-6">
                         <ChartAreaInteractive
                             data={data}
-                            timeRange={timeRange}
-                            setTimeRange={setTimeRange}
+                            dataKey="stress"
+                            title="Уровень стресса (PSS-14)"
+                            description="Динамика стресса"
+                            yAxisLabel="Баллы стресса"
+                            interpretation={`0–13: низкий уровень стресса 
+                            14–26: умеренный уровень стресса 
+                            27+: высокий уровень воспринимаемого стресса`}
+                        />
+                        <ChartAreaInteractive
+                            data={data}
+                            dataKey="engagement"
+                            title="Вовлечённость(Gallup)"
+                            description="Динамика вовлечённости"
+                            yAxisLabel="Баллы вовлечённости"
+                            interpretation={`0-34: плохая вовлечённость
+                            35-45: нормальный уровень
+                            45+: отличная`}
                         />
                     </div>
                 </div>
