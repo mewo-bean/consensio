@@ -1,11 +1,43 @@
 import webpush from 'web-push'
 import { prisma } from '@/lib/prisma';
+import { sendTelegramMessage } from "@/lib/tgUtils";
 
 webpush.setVapidDetails(
     'mailto:no-reply@yourdomain.com', // тут должен быть url или контактная почта
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
     process.env.VAPID_PRIVATE_KEY!
 );
+
+export async function sendTelegramToTeam(text: string, teamId: number) {
+    const teamMembers = await prisma.userTeam.findMany({
+        where: { teamId },
+        select: { userId: true }
+    });
+
+    const userIds = teamMembers.map(member => member.userId);
+    if (userIds.length === 0) return;
+
+    const users = await prisma.notificationSettings.findMany({
+        where: {
+            userId: { in: userIds },
+            notifyViaTg: true
+        },
+        select: { userId: true }
+    });
+
+    for (const user of users) {
+        await sendTelegramToUser(text, user.userId);
+    }
+}
+
+export async function sendTelegramToUser(text: string, userId: number) {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { tgId: true },
+    });
+    if (!user?.tgId) return;
+    await sendTelegramMessage(user.tgId, text);
+}
 
 export async function sendWebPushToAll(title: string, body: string, url: string = '/') {
     const users = await prisma.notificationSettings.findMany({

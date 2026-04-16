@@ -8,7 +8,6 @@ import { Loader2, CheckCircle2 } from "lucide-react";
 export default function TelegramSubscribe() {
     const [isLinked, setIsLinked] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [sending, setSending] = useState(false);
 
     useEffect(() => {
         fetchStatus();
@@ -69,23 +68,6 @@ export default function TelegramSubscribe() {
         }
     }
 
-    async function sendTestMessage() {
-        setSending(true);
-        try {
-            const res = await fetch("/api/test/send-telegram");
-            if (res.ok) {
-                toast.success("Тестовое сообщение отправлено в Telegram");
-            } else {
-                const data = await res.json();
-                toast.error(data.error || "Ошибка отправки");
-            }
-        } catch (err) {
-            toast.error("Не удалось отправить тестовое сообщение");
-        } finally {
-            setSending(false);
-        }
-    }
-
     if (loading) {
         return (
             <div className="flex justify-center py-2">
@@ -128,18 +110,6 @@ export default function TelegramSubscribe() {
                             Отвязать
                         </Button>
                     </div>
-
-                    <Button
-                        variant="outline"
-                        onClick={sendTestMessage}
-                        disabled={sending}
-                        className="w-full h-auto py-2 px-3 whitespace-normal text-left flex gap-2.5 justify-start"
-                    >
-            <span className="text-base leading-none shrink-0">
-              {sending ? <Loader2 className="h-4 w-4 animate-spin"/> : "📨"}
-            </span>
-                        <span className="text-sm leading-snug">Тестовое сообщение</span>
-                    </Button>
                 </div>
             )}
         </div>

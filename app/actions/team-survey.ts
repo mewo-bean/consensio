@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { sendTelegramToTeam, sendWebPushToTeam } from "@/lib/notifications";
 
 export async function assignSurveyToTeam(teamId: number, sampleSurveyId: number) {
   const user = await getCurrentUser();
@@ -40,7 +41,7 @@ export async function assignSurveyToTeam(teamId: number, sampleSurveyId: number)
     return { error: "Этот опрос уже назначен команде за последнюю неделю" };
   }
 
-  await prisma.teamSurvey.create({
+  const { id: createdSurveyId } = await prisma.teamSurvey.create({
     data: {
       teamId,
       sampleSurveyId,
@@ -49,6 +50,18 @@ export async function assignSurveyToTeam(teamId: number, sampleSurveyId: number)
 
   revalidatePath(`/dashboard/teams/${teamId}/surveys`);
   revalidatePath("/dashboard/surveys");
+
+  await sendWebPushToTeam(
+      "📝Новый опрос в Consensio!",
+      "Нажмите на уведомление, чтобы перейти к нему и пройти.",
+      teamId,
+      `/dashboard/surveys/${createdSurveyId}`
+  );
+  await sendTelegramToTeam(
+      "📝Новый опрос в Consensio!\n\nВам был назначен новый опрос в Consensio! Перейдите по ссылке ниже, чтобы пройти его\n" +
+      `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/surveys/${createdSurveyId}`,
+      teamId
+  );
   return { success: true };
 }
 
