@@ -6,199 +6,210 @@ import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export type TeamState = {
-  error?: string;
-  success?: boolean;
-  teamId?: number;
+    error?: string;
+    success?: boolean;
+    teamId?: string;
 } | null;
 
+function generateInviteCode() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let result = "";
+    for (let i = 0; i < 6; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
 export async function createTeam(
-  prevState: TeamState,
-  formData: FormData,
+    prevState: TeamState,
+    formData: FormData,
 ): Promise<TeamState> {
-  const user = await getCurrentUser();
-  if (!user) return { error: "Не авторизован" };
+    const user = await getCurrentUser();
+    if (!user) return { error: "Не авторизован" };
 
-  const title = formData.get("title") as string;
-  if (!title) return { error: "Название команды обязательно" };
+    const title = formData.get("title") as string;
+    if (!title) return { error: "Название команды обязательно" };
 
-  let newTeamId: number;
+    let newTeamId: string;
 
-  try {
-    const team = await prisma.team.create({
-      data: {
-        title: title,
-        members: {
-          create: {
-            userId: user.id,
-            role: "manager",
-          },
-        },
-      },
-    });
-    newTeamId = team.id;
-    revalidatePath("/dashboard");
-  } catch (error) {
-    console.error(error);
-    return { error: "Ошибка при создании команды" };
-  }
+    try {
+        const team = await prisma.team.create({
+            data: {
+                title: title,
+                inviteCode: generateInviteCode(),
+                members: {
+                    create: {
+                        userId: user.id,
+                        role: "manager",
+                    },
+                },
+            },
+        });
+        newTeamId = team.id;
+        revalidatePath("/dashboard");
+    } catch (error) {
+        console.error(error);
+        return { error: "Ошибка при создании команды" };
+    }
 
-  redirect(`/dashboard/teams/${newTeamId}`);
+    redirect(`/dashboard/teams/${newTeamId}`);
 }
 
 export async function joinTeam(
-  prevState: TeamState,
-  formData: FormData,
+    prevState: TeamState,
+    formData: FormData,
 ): Promise<TeamState> {
-  const user = await getCurrentUser();
-  if (!user) return { error: "Не авторизован" };
+    const user = await getCurrentUser();
+    if (!user) return { error: "Не авторизован" };
 
-  const inviteId = parseInt(formData.get("inviteId") as string, 10);
-  if (isNaN(inviteId)) return { error: "Неверный ID команды" };
+    const inviteCode = formData.get("inviteId") as string;
+    if (!inviteCode) return { error: "Неверный код" };
 
-  try {
-    await prisma.userTeam.create({
-      data: {
-        userId: user.id,
-        teamId: inviteId,
-        role: "member",
-      },
+    const team = await prisma.team.findUnique({
+        where: { inviteCode: inviteCode.toUpperCase() },
     });
-    revalidatePath("/dashboard");
-    return { success: true };
-  } catch (error) {
-    return {
-      error:
-        "Не удалось присоединиться. Возможно, ты уже в этой команде или ID неверен.",
-    };
-  }
+
+    if (!team) return { error: "Команда с таким кодом не найдена" };
+
+    try {
+        await prisma.userTeam.create({
+            data: {
+                userId: user.id,
+                teamId: team.id,
+                role: "member",
+            },
+        });
+        revalidatePath("/dashboard");
+        return { success: true };
+    } catch (error) {
+        return {
+            error: "Не удалось присоединиться. Возможно, ты уже в этой команде.",
+        };
+    }
 }
 
 export async function updateMemberRole(
-  teamId: number,
-  targetUserId: number,
-  newRole: "manager" | "member",
+    teamId: string,
+    targetUserId: number,
+    newRole: "manager" | "member",
 ) {
-  const user = await getCurrentUser();
-  if (!user) return { error: "Не авторизован" };
+    const user = await getCurrentUser();
+    if (!user) return { error: "Не авторизован" };
 
-  const adminCheck = await prisma.userTeam.findFirst({
-    where: { teamId: teamId, userId: user.id, role: "manager" },
-  });
-  if (!adminCheck) return { error: "У вас нет прав" };
-
-  try {
-    await prisma.userTeam.update({
-      where: {
-        userId_teamId: { userId: targetUserId, teamId: teamId },
-      },
-      data: { role: newRole },
+    const adminCheck = await prisma.userTeam.findFirst({
+        where: { teamId: teamId, userId: user.id, role: "manager" },
     });
-    revalidatePath(`/dashboard/teams/${teamId}`);
-    return { success: true };
-  } catch (e) {
-    return { error: "Ошибка при смене роли" };
-  }
+    if (!adminCheck) return { error: "У вас нет прав" };
+
+    try {
+        await prisma.userTeam.update({
+            where: {
+                userId_teamId: { userId: targetUserId, teamId: teamId },
+            },
+            data: { role: newRole },
+        });
+        revalidatePath(`/dashboard/teams/${teamId}`);
+        return { success: true };
+    } catch (e) {
+        return { error: "Ошибка при смене роли" };
+    }
 }
 
-export async function removeMember(teamId: number, targetUserId: number) {
-  const user = await getCurrentUser();
-  if (!user) return { error: "Не авторизован" };
+export async function removeMember(teamId: string, targetUserId: number) {
+    const user = await getCurrentUser();
+    if (!user) return { error: "Не авторизован" };
 
-  const adminCheck = await prisma.userTeam.findFirst({
-    where: { teamId: teamId, userId: user.id, role: "manager" },
-  });
-  if (!adminCheck) return { error: "У вас нет прав" };
-
-  try {
-    await prisma.userTeam.delete({
-      where: {
-        userId_teamId: { userId: targetUserId, teamId: teamId },
-      },
+    const adminCheck = await prisma.userTeam.findFirst({
+        where: { teamId: teamId, userId: user.id, role: "manager" },
     });
-    revalidatePath(`/dashboard/teams/${teamId}`);
-    return { success: true };
-  } catch (e) {
-    return { error: "Ошибка при удалении" };
-  }
+    if (!adminCheck) return { error: "У вас нет прав" };
+
+    try {
+        await prisma.userTeam.delete({
+            where: {
+                userId_teamId: { userId: targetUserId, teamId: teamId },
+            },
+        });
+        revalidatePath(`/dashboard/teams/${teamId}`);
+        return { success: true };
+    } catch (e) {
+        return { error: "Ошибка при удалении" };
+    }
 }
 
-export async function deleteTeam(teamId: number) {
-  const user = await getCurrentUser();
-  if (!user) return { error: "Не авторизован" };
+export async function deleteTeam(teamId: string) {
+    const user = await getCurrentUser();
+    if (!user) return { error: "Не авторизован" };
 
-  const membership = await prisma.userTeam.findUnique({
-    where: {
-      userId_teamId: { userId: user.id, teamId: teamId },
-    },
-  });
-
-  if (!membership || membership.role !== "manager") {
-    return { error: "У вас нет прав на удаление этой команды" };
-  }
-
-  try {
-    await prisma.userTeam.deleteMany({
-      where: { teamId: teamId },
-    });
-
-    await prisma.team.delete({
-      where: { id: teamId },
-    });
-
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/teams");
-  } catch (error) {
-    console.error("Ошибка удаления:", error);
-    return { error: "Не удалось удалить команду из базы данных" };
-  }
-
-  redirect("/dashboard");
-}
-
-export async function leaveTeam(teamId: number) {
-  const user = await getCurrentUser();
-  if (!user) return { error: "Не авторизован" };
-
-  try {
     const membership = await prisma.userTeam.findUnique({
-      where: {
-        userId_teamId: { userId: user.id, teamId: teamId },
-      },
+        where: {
+            userId_teamId: { userId: user.id, teamId: teamId },
+        },
     });
 
-    if (!membership) return { error: "Вы не состоите в этой команде" };
-
-    // если пользователь — админ, проверяем, не единственный ли он
-    if (membership.role === "manager") {
-      const managersCount = await prisma.userTeam.count({
-        where: {
-          teamId: teamId,
-          role: "manager",
-        },
-      });
-
-      // если он один — запрещаем выход
-      if (managersCount <= 1) {
-        return {
-          error:
-            "Вы единственный администратор! Назначьте админом кого-нибудь еще перед выходом или удалите команду целиком.",
-        };
-      }
+    if (!membership || membership.role !== "manager") {
+        return { error: "У вас нет прав на удаление этой команды" };
     }
 
-    // если всё в порядке (он обычный участник или админов несколько) — удаляем
-    await prisma.userTeam.delete({
-      where: {
-        userId_teamId: { userId: user.id, teamId: teamId },
-      },
-    });
+    try {
+        await prisma.userTeam.deleteMany({
+            where: { teamId: teamId },
+        });
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/teams");
-  } catch (error) {
-    console.error("Ошибка при выходе из команды:", error);
-    return { error: "Не удалось покинуть команду" };
-  }
+        await prisma.team.delete({
+            where: { id: teamId },
+        });
 
-  redirect("/dashboard");
+        revalidatePath("/dashboard");
+        revalidatePath("/dashboard/teams");
+    } catch (error) {
+        console.error("Ошибка удаления:", error);
+        return { error: "Не удалось удалить команду из базы данных" };
+    }
+
+    redirect("/dashboard");
+}
+
+export async function leaveTeam(teamId: string) {
+    const user = await getCurrentUser();
+    if (!user) return { error: "Не авторизован" };
+
+    try {
+        const membership = await prisma.userTeam.findUnique({
+            where: {
+                userId_teamId: { userId: user.id, teamId: teamId },
+            },
+        });
+
+        if (!membership) return { error: "Вы не состоите в этой команде" };
+
+        if (membership.role === "manager") {
+            const managersCount = await prisma.userTeam.count({
+                where: {
+                    teamId: teamId,
+                    role: "manager",
+                },
+            });
+
+            if (managersCount <= 1) {
+                return {
+                    error: "Вы единственный администратор! Назначьте админом кого-нибудь еще перед выходом или удалите команду целиком.",
+                };
+            }
+        }
+
+        await prisma.userTeam.delete({
+            where: {
+                userId_teamId: { userId: user.id, teamId: teamId },
+            },
+        });
+
+        revalidatePath("/dashboard");
+        revalidatePath("/dashboard/teams");
+    } catch (error) {
+        console.error("Ошибка при выходе из команды:", error);
+        return { error: "Не удалось покинуть команду" };
+    }
+
+    redirect("/dashboard");
 }

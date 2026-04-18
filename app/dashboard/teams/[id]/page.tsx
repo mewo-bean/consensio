@@ -1,8 +1,8 @@
 "use client";
 
-import {ChartAreaInteractive} from "@/components/chart-area-interactive";
-import {SectionCards} from "@/components/section-cards";
-import {PageHeader} from "@/components/layout/page-header";
+import { ChartAreaInteractive } from "@/components/chart-area-interactive";
+import { SectionCards } from "@/components/section-cards";
+import { PageHeader } from "@/components/layout/page-header";
 import { getAnalytics } from "@/app/get-analytics";
 import { getMetrics } from "@/app/get-metrics";
 import { useParams } from "next/navigation";
@@ -22,7 +22,7 @@ interface ChartData {
 }
 
 interface TeamDashboardPageProps {
-    teamId?: number;
+    teamId?: string;
     title?: string;
 }
 
@@ -32,13 +32,11 @@ export default function TeamDashboardPage() {
     const [metrics, setMetrics] = React.useState<DashboardMetrics | null>(null);
 
     const params = useParams();
-    const teamId = params.id ? parseInt(params.id as string, 10) : undefined;
+    const teamId = typeof params.id === "string" ? params.id : undefined;
 
     React.useEffect(() => {
         if (!teamId) return;
-        getMetrics(teamId)
-            .then(setMetrics)
-            .catch(console.error);
+        getMetrics(teamId).then(setMetrics).catch(console.error);
     }, [teamId]);
 
     React.useEffect(() => {
@@ -57,7 +55,7 @@ export default function TeamDashboardPage() {
 
             <div className="@container/main flex flex-1 flex-col">
                 <div className="flex flex-col gap-6 pb-4 md:pb-6">
-                    <SectionCards metrics={metrics}/>
+                    <SectionCards metrics={metrics} />
                     <div className="px-4 lg:px-6 flex flex-col gap-6">
                         <ChartAreaInteractive
                             data={data}
@@ -65,8 +63,8 @@ export default function TeamDashboardPage() {
                             title="Уровень стресса (PSS-14)"
                             description="Динамика стресса"
                             yAxisLabel="Баллы стресса"
-                            interpretation={`0–13: низкий уровень стресса 
-                            14–26: умеренный уровень стресса 
+                            interpretation={`0–13: низкий уровень стресса
+                            14–26: умеренный уровень стресса
                             27+: высокий уровень воспринимаемого стресса`}
                         />
                         <ChartAreaInteractive

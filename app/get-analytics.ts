@@ -1,22 +1,22 @@
-"use server"
+"use server";
 
-import { prisma } from "@/lib/prisma"
-import { auth } from "@/auth"
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 
-export async function getAnalytics(days: number = 90, targetTeamId?: number) {
-    const session = await auth()
-    if (!session?.user?.id) throw new Error("Unauthorized")
+export async function getAnalytics(days: number = 90, targetTeamId?: string) {
+    const session = await auth();
+    if (!session?.user?.id) throw new Error("Unauthorized");
 
     const userId = parseInt(session.user.id, 10);
 
-    let teamIds: number[] = [];
+    let teamIds: string[] = [];
 
     if (targetTeamId) {
         const membership = await prisma.userTeam.findFirst({
             where: {
                 userId: userId,
-                teamId: targetTeamId
-            }
+                teamId: targetTeamId,
+            },
         });
         if (!membership) throw new Error("Нет доступа к команде");
         teamIds = [targetTeamId];
@@ -24,12 +24,12 @@ export async function getAnalytics(days: number = 90, targetTeamId?: number) {
         // берем все команды юзера, если id не указали
         const userTeams = await prisma.userTeam.findMany({
             where: { userId: userId },
-            select: { teamId: true }
+            select: { teamId: true },
         });
-        teamIds = userTeams.map(ut => ut.teamId);
+        teamIds = userTeams.map((ut) => ut.teamId);
     }
 
-    if (teamIds.length === 0) return []
+    if (teamIds.length === 0) return [];
 
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
@@ -38,46 +38,63 @@ export async function getAnalytics(days: number = 90, targetTeamId?: number) {
         where: {
             sentAt: { gte: startDate },
             teamSurvey: {
-                teamId: { in: teamIds }
+                teamId: { in: teamIds },
             },
             user: {
                 teams: {
                     some: {
-                        role: 'member'
-                    }
-                }
+                        role: "member",
+                    },
+                },
             },
         },
         include: {
-            sampleSurvey: { select: { title: true } }
+            sampleSurvey: { select: { title: true } },
         },
-        orderBy: { sentAt: 'asc' }
-    })
+        orderBy: { sentAt: "asc" },
+    });
 
-    const dataMap = new Map<string, { stress: number[], engagement: number[] }>()
+    const dataMap = new Map<
+        string,
+        { stress: number[]; engagement: number[] }
+    >();
 
-    results.forEach(res => {
-        const dateKey = res.sentAt.toISOString().split('T')[0];
+    results.forEach((res) => {
+        const dateKey = res.sentAt.toISOString().split("T")[0];
 
         if (!dataMap.has(dateKey)) {
-            dataMap.set(dateKey, { stress: [], engagement: [] })
+            dataMap.set(dateKey, { stress: [], engagement: [] });
         }
 
-        const entry = dataMap.get(dateKey)!
+        const entry = dataMap.get(dateKey)!;
         if (res.sampleSurvey.title.includes("PSS-14")) {
-            entry.stress.push(res.totalScore)
+            entry.stress.push(res.totalScore);
         } else if (res.sampleSurvey.title.includes("Gallup")) {
-            entry.engagement.push(res.totalScore)
+            entry.engagement.push(res.totalScore);
         }
-    })
+    });
 
-    return Array.from(dataMap.entries()).map(([date, values]) => ({
-        date,
-        stress: values.stress.length > 0
-            ? Number((values.stress.reduce((a, b) => a + b, 0) / values.stress.length).toFixed(4))
-            : null,
-        engagement: values.engagement.length > 0
-            ? Number((values.engagement.reduce((a, b) => a + b, 0) / values.engagement.length).toFixed(4))
-            : null
-    })).sort((a, b) => a.date.localeCompare(b.date))
+    return Array.from(dataMap.entries())
+        .map(([date, values]) => ({
+            date,
+            stress:
+                values.stress.length > 0
+                    ? Number(
+                          (
+                              values.stress.reduce((a, b) => a + b, 0) /
+                              values.stress.length
+                          ).toFixed(4),
+                      )
+                    : null,
+            engagement:
+                values.engagement.length > 0
+                    ? Number(
+                          (
+                              values.engagement.reduce((a, b) => a + b, 0) /
+                              values.engagement.length
+                          ).toFixed(4),
+                      )
+                    : null,
+        }))
+        .sort((a, b) => a.date.localeCompare(b.date));
 }

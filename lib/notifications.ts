@@ -1,28 +1,28 @@
-import webpush from 'web-push'
-import { prisma } from '@/lib/prisma';
+import webpush from "web-push";
+import { prisma } from "@/lib/prisma";
 import { sendTelegramMessage } from "@/lib/tgUtils";
 
 webpush.setVapidDetails(
-    'mailto:no-reply@yourdomain.com', // тут должен быть url или контактная почта
+    "mailto:no-reply@yourdomain.com", // тут должен быть url или контактная почта
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-    process.env.VAPID_PRIVATE_KEY!
+    process.env.VAPID_PRIVATE_KEY!,
 );
 
-export async function sendTelegramToTeam(text: string, teamId: number) {
+export async function sendTelegramToTeam(text: string, teamId: string) {
     const teamMembers = await prisma.userTeam.findMany({
         where: { teamId },
-        select: { userId: true }
+        select: { userId: true },
     });
 
-    const userIds = teamMembers.map(member => member.userId);
+    const userIds = teamMembers.map((member) => member.userId);
     if (userIds.length === 0) return;
 
     const users = await prisma.notificationSettings.findMany({
         where: {
             userId: { in: userIds },
-            notifyViaTg: true
+            notifyViaTg: true,
         },
-        select: { userId: true }
+        select: { userId: true },
     });
 
     for (const user of users) {
@@ -39,10 +39,14 @@ export async function sendTelegramToUser(text: string, userId: number) {
     await sendTelegramMessage(user.tgId, text);
 }
 
-export async function sendWebPushToAll(title: string, body: string, url: string = '/') {
+export async function sendWebPushToAll(
+    title: string,
+    body: string,
+    url: string = "/",
+) {
     const users = await prisma.notificationSettings.findMany({
         where: { notifyViaWeb: true },
-        select: { userId: true }
+        select: { userId: true },
     });
 
     for (const user of users) {
@@ -50,21 +54,26 @@ export async function sendWebPushToAll(title: string, body: string, url: string 
     }
 }
 
-export async function sendWebPushToTeam(title: string, body: string, teamId: number, url: string = '/') {
+export async function sendWebPushToTeam(
+    title: string,
+    body: string,
+    teamId: string,
+    url: string = "/",
+) {
     const teamMembers = await prisma.userTeam.findMany({
         where: { teamId },
-        select: { userId: true }
+        select: { userId: true },
     });
 
-    const userIds = teamMembers.map(member => member.userId);
+    const userIds = teamMembers.map((member) => member.userId);
     if (userIds.length === 0) return;
 
     const users = await prisma.notificationSettings.findMany({
         where: {
             userId: { in: userIds },
-            notifyViaWeb: true
+            notifyViaWeb: true,
         },
-        select: { userId: true }
+        select: { userId: true },
     });
 
     for (const user of users) {
@@ -72,7 +81,12 @@ export async function sendWebPushToTeam(title: string, body: string, teamId: num
     }
 }
 
-export async function sendWebPushToUser(userId: number, title: string, body: string, url: string = '/') {
+export async function sendWebPushToUser(
+    userId: number,
+    title: string,
+    body: string,
+    url: string = "/",
+) {
     const subscriptions = await prisma.webPushSubscription.findMany({
         where: { userId },
     });
@@ -89,10 +103,17 @@ export async function sendWebPushToUser(userId: number, title: string, body: str
             await webpush.sendNotification(pushSubscription, payload);
         } catch (err: any) {
             if (err.statusCode === 410 || err.statusCode === 404) {
-                await prisma.webPushSubscription.delete({ where: { id: sub.id } });
-                console.log(`Removed expired subscription for user ${userId}, endpoint ${sub.endpoint}`);
+                await prisma.webPushSubscription.delete({
+                    where: { id: sub.id },
+                });
+                console.log(
+                    `Removed expired subscription for user ${userId}, endpoint ${sub.endpoint}`,
+                );
             } else {
-                console.error(`Failed to send push to user ${userId}, device ${sub.deviceName}:`, err);
+                console.error(
+                    `Failed to send push to user ${userId}, device ${sub.deviceName}:`,
+                    err,
+                );
             }
         }
     }
