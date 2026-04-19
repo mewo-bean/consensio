@@ -7,6 +7,8 @@ import { getAnalytics } from "@/app/get-analytics";
 import { getMetrics } from "@/app/get-metrics";
 import { useParams } from "next/navigation";
 import * as React from "react";
+import {TriangleAlert} from "lucide-react";
+import {Alert, AlertTitle} from "@/components/ui/alert";
 
 interface DashboardMetrics {
     participationRate: number;
@@ -57,6 +59,10 @@ export default function TeamDashboardPage() {
                 <div className="flex flex-col gap-6 pb-4 md:pb-6">
                     <SectionCards metrics={metrics} />
                     <div className="px-4 lg:px-6 flex flex-col gap-6">
+                        <Alert className="text-amber-600 font-bold">
+                            <TriangleAlert/>
+                            <AlertTitle>Пройденные менеджерами опросы не учитываются</AlertTitle>
+                        </Alert>
                         <ChartAreaInteractive
                             data={data}
                             dataKey="stress"
