@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { sendTelegramToTeam, sendWebPushToTeam } from "@/lib/notifications";
+import { logProductActivity } from "@/lib/product-metrics";
 
 export async function assignSurveyToTeam(
     teamId: string,
@@ -51,18 +52,25 @@ export async function assignSurveyToTeam(
         },
     });
 
+    logProductActivity("survey_created", {
+        teamId,
+        surveyId: createdSurveyId,
+    }).catch(console.error);
+
     revalidatePath(`/dashboard/teams/${teamId}/surveys`);
     revalidatePath("/dashboard/surveys");
+
+    const surveyPathWithParam = `/dashboard/surveys/${createdSurveyId}?from_noti=true`;
 
     await sendWebPushToTeam(
         "📝Новый опрос в Consensio!",
         "Нажмите на уведомление, чтобы перейти к нему и пройти.",
         teamId,
-        `/dashboard/surveys/${createdSurveyId}`,
+        surveyPathWithParam,
     );
     await sendTelegramToTeam(
         "📝Новый опрос в Consensio!\n\nВам был назначен новый опрос в Consensio! Перейдите по ссылке ниже, чтобы пройти его\n" +
-            `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/surveys/${createdSurveyId}`,
+            `${process.env.NEXT_PUBLIC_BASE_URL}${surveyPathWithParam}`,
         teamId,
     );
     return { success: true };

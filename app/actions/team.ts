@@ -152,22 +152,43 @@ export async function deleteTeam(teamId: string) {
     }
 
     try {
+        // 1. Сначала каскадно удаляем анонимный фидбек команды (complaint)
+        await prisma.complaint.deleteMany({ where: { teamId } });
+
+        // 2. Находим все опросы команды
+        const teamSurveys = await prisma.teamSurvey.findMany({
+            where: { teamId },
+            select: { id: true },
+        });
+        const surveyIds = teamSurveys.map((s) => s.id);
+
+        // 3. Удаляем результаты пройденных опросов и сами опросы
+        if (surveyIds.length > 0) {
+            await prisma.surveyResult.deleteMany({
+                where: { teamSurveyId: { in: surveyIds } },
+            });
+            await prisma.teamSurvey.deleteMany({ where: { teamId } });
+        }
+
+        // 4. Удаляем всех участников команды
         await prisma.userTeam.deleteMany({
             where: { teamId: teamId },
         });
 
+        // 5. Теперь удаляем саму команду (без зависимостей она удалится чисто)
         await prisma.team.delete({
             where: { id: teamId },
         });
 
         revalidatePath("/dashboard");
         revalidatePath("/dashboard/teams");
+
+        // Возвращаем success: true, чтобы клиентская кнопка сама сделала router.push
+        return { success: true };
     } catch (error) {
         console.error("Ошибка удаления:", error);
         return { error: "Не удалось удалить команду из базы данных" };
     }
-
-    redirect("/dashboard");
 }
 
 export async function leaveTeam(teamId: string) {

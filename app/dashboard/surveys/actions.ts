@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { getSurveyTemplateForTitle } from "@/lib/surveys/templates";
+import { logProductActivity } from "@/lib/product-metrics";
 
 export type ActiveSurveyDto = {
     id: number;
@@ -47,8 +48,8 @@ export async function getActiveSurveys(
     const user = await getCurrentUser();
     if (!user) return [];
 
-    let teamIds: number[] = [];
-    if (typeof teamId === "number" && Number.isFinite(teamId)) {
+    let teamIds: string[] = [];
+    if (teamId) {
         const membership = await prisma.userTeam.findUnique({
             where: { userId_teamId: { userId: user.id, teamId } },
             select: { teamId: true },
@@ -99,8 +100,8 @@ export async function getCompletedSurveys(
     const user = await getCurrentUser();
     if (!user) return [];
 
-    let teamIds: number[] = [];
-    if (typeof teamId === "number" && Number.isFinite(teamId)) {
+    let teamIds: string[] = [];
+    if (teamId) {
         const membership = await prisma.userTeam.findUnique({
             where: { userId_teamId: { userId: user.id, teamId } },
             select: { teamId: true },
@@ -155,8 +156,8 @@ export async function getExpiredSurveys(
     const user = await getCurrentUser();
     if (!user) return [];
 
-    let teamIds: number[] = [];
-    if (typeof teamId === "number" && Number.isFinite(teamId)) {
+    let teamIds: string[] = [];
+    if (teamId) {
         const membership = await prisma.userTeam.findUnique({
             where: { userId_teamId: { userId: user.id, teamId } },
             select: { teamId: true },
@@ -265,6 +266,10 @@ export async function submitTeamSurvey(formData: FormData) {
             sentAt: new Date(),
         },
     });
+
+    logProductActivity("survey_completed", { teamSurveyId }).catch(
+        console.error,
+    );
 
     revalidatePath("/dashboard/surveys");
     redirect("/dashboard/surveys");

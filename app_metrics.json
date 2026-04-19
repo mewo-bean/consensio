@@ -1,0 +1,64 @@
+[
+  {
+    "timestamp": "2026-04-19T14:37:02.193Z",
+    "trigger_event": "feedback_sent",
+    "system_metrics": {
+      "total_surveys": 10,
+      "total_feedbacks": 17,
+      "participation_rate": "75.0%"
+    },
+    "event_details": {
+      "teamId": "4cd86372-9760-45bf-a1c2-39d2a3127e77"
+    }
+  },
+  {
+    "timestamp": "2026-04-19T14:37:25.802Z",
+    "trigger_event": "survey_created",
+    "system_metrics": {
+      "total_surveys": 11,
+      "total_feedbacks": 17,
+      "participation_rate": "75.0%"
+    },
+    "event_details": {
+      "teamId": "5789f779-6cab-4b0c-80f0-29efc4e8f9df",
+      "surveyId": 11
+    }
+  },
+  {
+    "timestamp": "2026-04-19T14:37:27.398Z",
+    "trigger_event": "survey_created",
+    "system_metrics": {
+      "total_surveys": 12,
+      "total_feedbacks": 17,
+      "participation_rate": "75.0%"
+    },
+    "event_details": {
+      "teamId": "5789f779-6cab-4b0c-80f0-29efc4e8f9df",
+      "surveyId": 12
+    }
+  },
+  {
+    "timestamp": "2026-04-19T14:38:02.848Z",
+    "trigger_event": "feedback_sent",
+    "system_metrics": {
+      "total_surveys": 12,
+      "total_feedbacks": 18,
+      "participation_rate": "50.0%"
+    },
+    "event_details": {
+      "teamId": "5789f779-6cab-4b0c-80f0-29efc4e8f9df"
+    }
+  },
+  {
+    "timestamp": "2026-04-19T14:38:31.979Z",
+    "trigger_event": "survey_completed",
+    "system_metrics": {
+      "total_surveys": 12,
+      "total_feedbacks": 18,
+      "participation_rate": "66.7%"
+    },
+    "event_details": {
+      "teamSurveyId": 12
+    }
+  }
+]

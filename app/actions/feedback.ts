@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { logProductActivity } from "@/lib/product-metrics";
 
 export async function submitTeamFeedback(teamId: string, content: string) {
     const user = await getCurrentUser();
@@ -39,6 +40,8 @@ export async function submitTeamFeedback(teamId: string, content: string) {
             isAnon: true,
         },
     });
+
+    logProductActivity("feedback_sent", { teamId }).catch(console.error);
 
     revalidatePath(`/dashboard/teams/${teamId}/feedback`);
     return { success: true };
