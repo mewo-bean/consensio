@@ -15,6 +15,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout/page-header";
+import { getSurveyInterpretation } from "@/lib/surveys/interpretations";
+import { cn } from "@/lib/utils";
 
 export default async function TakeSurveyPage({
     params,
@@ -70,47 +72,65 @@ export default async function TakeSurveyPage({
     const isExpired = surveyExpiresAt.getTime() <= nowTime;
 
     if (existing) {
-        return (
-            <div className="flex flex-1 justify-center px-4 py-6 sm:px-6">
-                <div className="w-full max-w-3xl space-y-6 text-left">
-                    <div className="text-left w-full flex flex-col items-start">
-                        <PageHeader
-                            title={teamSurvey.sampleSurvey.title}
-                            description={`Опрос команды «${teamSurvey.team.title}». Все ответы анонимные.`}
-                        />
-                    </div>
+        const interpretation = getSurveyInterpretation(
+            teamSurvey.sampleSurvey.title,
+            existing.totalScore,
+        );
 
-                    <Card className="mx-auto w-full max-w-2xl border-muted/60">
-                        <CardHeader className="text-left">
-                            <CardTitle>
-                                {teamSurvey.sampleSurvey.title}
-                            </CardTitle>
-                            <CardDescription>
-                                {teamSurvey.team.title}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="text-sm text-muted-foreground">
-                                Вы уже прошли этот опрос{" "}
-                                <span className="font-medium text-foreground">
+        return (
+            <div className="flex-1 flex flex-col pt-6 pb-20">
+                <div className="px-4 sm:px-6 lg:px-8">
+                    <PageHeader
+                        title={teamSurvey.sampleSurvey.title}
+                        description={`Опрос команды «${teamSurvey.team.title}». Все ответы анонимные.`}
+                    />
+                </div>
+                <div className="flex justify-center px-4 sm:px-6 lg:px-8 mt-6">
+                    <div className="w-full max-w-2xl text-left">
+                        <Card className="border-muted/60">
+                            <CardHeader className="text-left pb-4">
+                                <CardTitle>Опрос завершен</CardTitle>
+                                <CardDescription>
+                                    Вы прошли этот опрос{" "}
                                     {new Date(existing.sentAt).toLocaleString(
                                         "ru-RU",
                                     )}
-                                </span>
-                                .
-                            </div>
-                            <div className="flex items-center justify-between gap-3">
-                                <Badge variant="secondary">
-                                    Результат: {existing.totalScore}
-                                </Badge>
-                                <Button asChild variant="outline">
-                                    <Link href="/dashboard/surveys">
-                                        К опросам
-                                    </Link>
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <div
+                                    className={cn(
+                                        "p-5 rounded-xl border",
+                                        interpretation.colorClass,
+                                    )}
+                                >
+                                    <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                        <h4 className="font-bold text-base sm:text-lg">
+                                            {interpretation.level}
+                                        </h4>
+                                        <Badge
+                                            variant="outline"
+                                            className="bg-background/50 font-bold border-current/20"
+                                        >
+                                            Набрано баллов:{" "}
+                                            {existing.totalScore}
+                                        </Badge>
+                                    </div>
+                                    <p className="text-sm leading-relaxed opacity-90">
+                                        {interpretation.description}
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center justify-start pt-2">
+                                    <Button asChild variant="outline">
+                                        <Link href="/dashboard/surveys">
+                                            К списку опросов
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             </div>
         );
@@ -118,152 +138,158 @@ export default async function TakeSurveyPage({
 
     if (isExpired) {
         return (
-            <div className="flex flex-1 justify-center px-4 py-6 sm:px-6">
-                <div className="w-full max-w-3xl space-y-6 text-left">
-                    <div className="text-left w-full flex flex-col items-start">
-                        <PageHeader
-                            title={teamSurvey.sampleSurvey.title}
-                            description={`Опрос команды «${teamSurvey.team.title}». Все ответы анонимные.`}
-                        />
+            <div className="flex-1 flex flex-col pt-6 pb-20">
+                <div className="px-4 sm:px-6 lg:px-8">
+                    <PageHeader
+                        title={teamSurvey.sampleSurvey.title}
+                        description={`Опрос команды «${teamSurvey.team.title}». Все ответы анонимные.`}
+                    />
+                </div>
+                <div className="flex justify-center px-4 sm:px-6 lg:px-8 mt-6">
+                    <div className="w-full max-w-2xl text-left">
+                        <Card className="border-muted bg-muted/20">
+                            <CardHeader className="text-left">
+                                <CardTitle>
+                                    {teamSurvey.sampleSurvey.title}
+                                </CardTitle>
+                                <CardDescription>
+                                    {teamSurvey.team.title}
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="text-sm text-muted-foreground">
+                                    Срок прохождения этого опроса завершился{" "}
+                                    <span className="font-medium text-foreground">
+                                        {surveyExpiresAt.toLocaleString(
+                                            "ru-RU",
+                                        )}
+                                    </span>
+                                    .
+                                </div>
+                                <div className="flex items-center justify-between gap-3">
+                                    <Badge variant="secondary">
+                                        Опрос окончен
+                                    </Badge>
+                                    <Button asChild variant="outline">
+                                        <Link href="/dashboard/surveys">
+                                            К опросам
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
-
-                    <Card className="mx-auto w-full max-w-2xl border-muted bg-muted/20">
-                        <CardHeader className="text-left">
-                            <CardTitle>
-                                {teamSurvey.sampleSurvey.title}
-                            </CardTitle>
-                            <CardDescription>
-                                {teamSurvey.team.title}
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="text-sm text-muted-foreground">
-                                Срок прохождения этого опроса завершился{" "}
-                                <span className="font-medium text-foreground">
-                                    {surveyExpiresAt.toLocaleString("ru-RU")}
-                                </span>
-                                .
-                            </div>
-                            <div className="flex items-center justify-between gap-3">
-                                <Badge variant="secondary">Опрос окончен</Badge>
-                                <Button asChild variant="outline">
-                                    <Link href="/dashboard/surveys">
-                                        К опросам
-                                    </Link>
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-1 justify-center px-4 py-6 sm:px-6">
-            <div className="w-full max-w-4xl space-y-6">
-                <div className="text-left w-full flex flex-col items-start">
-                    <PageHeader
-                        title={teamSurvey.sampleSurvey.title}
-                        description={`Опрос команды «${teamSurvey.team.title}». Все ответы анонимные.`}
-                    />
-                </div>
+        <div className="flex-1 flex flex-col pt-6 pb-20">
+            <div className="px-4 sm:px-6 lg:px-8">
+                <PageHeader
+                    title={teamSurvey.sampleSurvey.title}
+                    description={`Опрос команды «${teamSurvey.team.title}». Все ответы анонимные.`}
+                />
+            </div>
+            <div className="flex justify-center px-4 sm:px-6 lg:px-8 mt-6">
+                <div className="w-full max-w-4xl space-y-6 text-left">
+                    <form action={submitTeamSurvey} className="space-y-4">
+                        <input
+                            type="hidden"
+                            name="teamSurveyId"
+                            value={teamSurveyId}
+                        />
 
-                <form action={submitTeamSurvey} className="space-y-4">
-                    <input
-                        type="hidden"
-                        name="teamSurveyId"
-                        value={teamSurveyId}
-                    />
-
-                    <div className="rounded-xl border border-muted/60 bg-muted/10 px-4 py-3 text-sm text-muted-foreground text-left">
-                        Ответы на этот опрос отправляются анонимно
-                        автоматически.
-                    </div>
-
-                    <Card className="border-muted/60 bg-muted/10">
-                        <CardHeader className="pb-3 text-left">
-                            <CardTitle className="text-sm">
-                                Шкала ответов
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                            <div className="flex flex-wrap gap-2">
-                                {template.choices.map((choice) => (
-                                    <div
-                                        key={choice.value}
-                                        className="inline-flex items-center gap-2 rounded-full border border-muted/60 bg-background px-3 py-1.5 text-xs sm:text-sm"
-                                    >
-                                        <span className="font-semibold text-foreground">
-                                            {choice.value}
-                                        </span>
-                                        <span className="text-muted-foreground">
-                                            {choice.label}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Вывод приветствия */}
-                    {template.greeting && (
-                        <div className="rounded-xl border border-primary/20 bg-primary/5 px-6 py-4 text-lg font-medium italic text-foreground/90 text-left">
-                            {template.greeting}
+                        <div className="rounded-xl border border-muted/60 bg-muted/10 px-4 py-3 text-sm text-muted-foreground text-left">
+                            Ответы на этот опрос отправляются анонимно
+                            автоматически.
                         </div>
-                    )}
 
-                    {template.questions.map((question, index) => (
-                        <Card key={index} className="border-muted/60">
+                        <Card className="border-muted/60 bg-muted/10">
                             <CardHeader className="pb-3 text-left">
-                                <CardTitle className="text-base">
-                                    {template.questions.length > 1
-                                        ? `Вопрос ${index + 1}`
-                                        : "Вопрос"}
+                                <CardTitle className="text-sm">
+                                    Шкала ответов
                                 </CardTitle>
-                                <CardDescription className="text-sm text-foreground">
-                                    {question}
-                                </CardDescription>
                             </CardHeader>
                             <CardContent className="pt-0">
                                 <div className="flex flex-wrap gap-2">
-                                    {template.choices.map((choice) => {
-                                        const inputId = `q_${teamSurveyId}_${index}_${choice.value}`;
-                                        return (
-                                            <label
-                                                key={choice.value}
-                                                htmlFor={inputId}
-                                                className="flex min-w-0 cursor-pointer items-center gap-2 rounded-full border border-muted/60 bg-background px-3 py-2 text-sm hover:bg-muted/20"
-                                            >
-                                                <input
-                                                    id={inputId}
-                                                    type="radio"
-                                                    name={`q_${index}`}
-                                                    value={choice.value}
-                                                    required
-                                                    className="size-4 accent-primary"
-                                                />
-                                                <Badge
-                                                    variant="outline"
-                                                    className="h-6 shrink-0"
-                                                >
-                                                    {choice.value}
-                                                </Badge>
-                                            </label>
-                                        );
-                                    })}
+                                    {template.choices.map((choice) => (
+                                        <div
+                                            key={choice.value}
+                                            className="inline-flex items-center gap-2 rounded-full border border-muted/60 bg-background px-3 py-1.5 text-xs sm:text-sm"
+                                        >
+                                            <span className="font-semibold text-foreground">
+                                                {choice.value}
+                                            </span>
+                                            <span className="text-muted-foreground">
+                                                {choice.label}
+                                            </span>
+                                        </div>
+                                    ))}
                                 </div>
                             </CardContent>
                         </Card>
-                    ))}
 
-                    <div className="flex items-center justify-between gap-3 pt-4">
-                        <Button asChild variant="outline">
-                            <Link href="/dashboard/surveys">Назад</Link>
-                        </Button>
-                        <Button type="submit">Отправить</Button>
-                    </div>
-                </form>
+                        {/* Вывод приветствия */}
+                        {template.greeting && (
+                            <div className="rounded-xl border border-primary/20 bg-primary/5 px-6 py-4 text-lg font-medium italic text-foreground/90 text-left">
+                                {template.greeting}
+                            </div>
+                        )}
+
+                        {template.questions.map((question, index) => (
+                            <Card key={index} className="border-muted/60">
+                                <CardHeader className="pb-3 text-left">
+                                    <CardTitle className="text-base">
+                                        {template.questions.length > 1
+                                            ? `Вопрос ${index + 1}`
+                                            : "Вопрос"}
+                                    </CardTitle>
+                                    <CardDescription className="text-sm text-foreground">
+                                        {question}
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="pt-0">
+                                    <div className="flex flex-wrap gap-2">
+                                        {template.choices.map((choice) => {
+                                            const inputId = `q_${teamSurveyId}_${index}_${choice.value}`;
+                                            return (
+                                                <label
+                                                    key={choice.value}
+                                                    htmlFor={inputId}
+                                                    className="flex min-w-0 cursor-pointer items-center gap-2 rounded-full border border-muted/60 bg-background px-3 py-2 text-sm hover:bg-muted/20"
+                                                >
+                                                    <input
+                                                        id={inputId}
+                                                        type="radio"
+                                                        name={`q_${index}`}
+                                                        value={choice.value}
+                                                        required
+                                                        className="size-4 accent-primary"
+                                                    />
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="h-6 shrink-0"
+                                                    >
+                                                        {choice.value}
+                                                    </Badge>
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+
+                        <div className="flex items-center justify-between gap-3 pt-4">
+                            <Button asChild variant="outline">
+                                <Link href="/dashboard/surveys">Назад</Link>
+                            </Button>
+                            <Button type="submit">Отправить</Button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );
