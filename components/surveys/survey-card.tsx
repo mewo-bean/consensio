@@ -38,7 +38,6 @@ export function SurveyCard({ survey }: { survey: SurveyListItem }) {
     const isCompleted = survey.status === "completed";
     const isExpired = survey.status === "expired";
 
-    // Получаем данные для отображения, если опрос пройден
     const interpretation =
         typeof survey.userScore === "number"
             ? getSurveyInterpretation(survey.title, survey.userScore)

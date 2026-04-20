@@ -22,6 +22,7 @@ model User {
   webPushSubscriptions  WebPushSubscription[]
   teams                 UserTeam[]
   telegramLinkTokens    TelegramLinkToken[]
+  appFeedbacks  AppFeedback[]
 
   @@map("users")
 }
@@ -187,4 +188,13 @@ model TelegramLinkToken {
   user      User     @relation(fields: [userId], references: [id])
 
   @@map("telegram_link_tokens")
+}
+
+model AppFeedback {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }

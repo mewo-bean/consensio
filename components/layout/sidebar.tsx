@@ -12,9 +12,11 @@ import {
     PlusCircle,
     CircleUser,
     Send,
+    Star,
 } from "lucide-react";
 import { useState } from "react";
 import { Sidebar as SidebarBase } from "@/components/ui/sidebar";
+import { FeedbackModal } from "@/components/layout/feedback-modal";
 
 type TeamInfo = { id: string; title: string; role: string };
 
@@ -28,11 +30,11 @@ export function Sidebar({ teams }: SidebarProps) {
     const currentTeamId = pathname.split("/")[3];
     const currentTeam = teams.find((t) => t.id.toString() === currentTeamId);
 
-    const navLinkClass = (path: string) =>
+    const navLinkClass = (path?: string) =>
         cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all text-sm font-medium overflow-hidden",
+            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all text-sm font-medium overflow-hidden w-full text-left",
             "max-sm:min-h-[44px] max-sm:py-3 max-sm:text-base",
-            pathname === path
+            path && pathname === path
                 ? "bg-primary/10 text-foreground border-l-4 border-primary rounded-l-none"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground border-l-4 border-transparent rounded-l-none",
         );
@@ -45,8 +47,8 @@ export function Sidebar({ teams }: SidebarProps) {
 
     return (
         <SidebarBase collapsible="offcanvas">
-            <div className="flex w-full flex-col gap-6 px-4 py-4">
-                <div className="px-2 overflow-hidden">
+            <div className="flex-1 overflow-y-auto flex w-full flex-col gap-6 px-4 py-4">
+                <div className="px-2 overflow-hidden shrink-0">
                     <Link href="/dashboard" className="block max-sm:py-2">
                         <h1 className="text-3xl font-extrabold tracking-tight text-primary truncate">
                             consensio.
@@ -54,7 +56,7 @@ export function Sidebar({ teams }: SidebarProps) {
                     </Link>
                 </div>
 
-                <nav className="flex flex-col gap-2 w-full">
+                <nav className="flex flex-col gap-2 w-full flex-1">
                     <Link
                         href="/dashboard/profile"
                         className={navLinkClass("/dashboard/profile")}
@@ -128,7 +130,7 @@ export function Sidebar({ teams }: SidebarProps) {
                     )}
 
                     {currentTeamId && currentTeam && (
-                        <div className="mt-4 flex flex-col gap-2 border-t pt-4 w-full">
+                        <div className="mt-4 flex flex-col gap-2 border-t pt-4 w-full shrink-0">
                             <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate max-sm:text-xs">
                                 {currentTeam.title}
                             </p>
@@ -174,6 +176,14 @@ export function Sidebar({ teams }: SidebarProps) {
                             </Link>
                         </div>
                     )}
+                    <div className="mt-auto pt-6 pb-2 w-full shrink-0">
+                        <FeedbackModal>
+                            <button className={navLinkClass()}>
+                                <Star className="size-4 shrink-0 text-yellow-400 fill-yellow-400/20" />
+                                <span>Оценить приложение</span>
+                            </button>
+                        </FeedbackModal>
+                    </div>
                 </nav>
             </div>
         </SidebarBase>
