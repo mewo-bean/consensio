@@ -1,0 +1,15 @@
+[
+  {
+    "timestamp": "2026-04-21T12:37:23.537Z",
+    "trigger_event": "survey_created",
+    "system_metrics": {
+      "total_surveys": 17,
+      "total_feedbacks": 18,
+      "participation_rate": "0.0%"
+    },
+    "event_details": {
+      "teamId": "b9b28a7e-1c5f-4ed1-837e-16994d10902f",
+      "surveyId": 17
+    }
+  }
+]
