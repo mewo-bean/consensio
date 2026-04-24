@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { sendTelegramMessage } from "@/lib/tgUtils";
 
 webpush.setVapidDetails(
-    "mailto:no-reply@yourdomain.com", // тут должен быть url или контактная почта
+    "mailto:no-reply@yourdomain.com",
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
     process.env.VAPID_PRIVATE_KEY!,
 );
@@ -17,26 +17,38 @@ export async function sendTelegramToTeam(text: string, teamId: string) {
     const userIds = teamMembers.map((member) => member.userId);
     if (userIds.length === 0) return;
 
-    const users = await prisma.notificationSettings.findMany({
+    const usersToNotify = await prisma.user.findMany({
         where: {
-            userId: { in: userIds },
-            notifyViaTg: true,
+            id: { in: userIds },
+            tgId: { not: null },
+            notificationSettings: {
+                notifyViaTg: true,
+            },
         },
-        select: { userId: true },
+        select: { tgId: true },
     });
 
-    for (const user of users) {
-        await sendTelegramToUser(text, user.userId);
+    for (const user of usersToNotify) {
+        if (user.tgId) {
+            await sendTelegramMessage(user.tgId, text).catch(console.error);
+        }
     }
 }
 
 export async function sendTelegramToUser(text: string, userId: number) {
     const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { tgId: true },
+        select: {
+            tgId: true,
+            notificationSettings: {
+                select: { notifyViaTg: true },
+            },
+        },
     });
-    if (!user?.tgId) return;
-    await sendTelegramMessage(user.tgId, text);
+
+    if (user?.tgId && user.notificationSettings?.notifyViaTg) {
+        await sendTelegramMessage(user.tgId, text).catch(console.error);
+    }
 }
 
 export async function sendWebPushToAll(
@@ -90,6 +102,7 @@ export async function sendWebPushToUser(
     const subscriptions = await prisma.webPushSubscription.findMany({
         where: { userId },
     });
+
     if (subscriptions.length === 0) return;
 
     const payload = JSON.stringify({ title, body, url });
@@ -106,14 +119,8 @@ export async function sendWebPushToUser(
                 await prisma.webPushSubscription.delete({
                     where: { id: sub.id },
                 });
-                console.log(
-                    `Removed expired subscription for user ${userId}, endpoint ${sub.endpoint}`,
-                );
             } else {
-                console.error(
-                    `Failed to send push to user ${userId}, device ${sub.deviceName}:`,
-                    err,
-                );
+                console.error(err);
             }
         }
     }

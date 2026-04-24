@@ -7,14 +7,17 @@ export async function DELETE() {
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const userId = parseInt(session.user.id, 10);
 
-    prisma.notificationSettings.upsert({
-        where: { userId: parseInt(session.user.id) },
+    await prisma.user.update({
+        where: { id: userId },
+        data: { tgId: null },
+    });
+
+    await prisma.notificationSettings.upsert({
+        where: { userId },
         update: { notifyViaTg: false },
-        create: {
-            userId: parseInt(session.user.id),
-            notifyViaTg: false,
-        },
+        create: { userId, notifyViaTg: false },
     });
 
     return NextResponse.json({ success: true });

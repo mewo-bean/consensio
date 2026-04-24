@@ -1,37 +1,38 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { prisma } from '@/lib/prisma';
-import crypto from 'crypto';
+import { prisma } from "@/lib/prisma";
+import crypto from "crypto";
 import { getBotUsername } from "@/lib/tgUtils";
 
 export async function POST() {
     const session = await auth();
     if (!session?.user?.id) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const userId = Number.parseInt(session.user.id);
+    const userId = parseInt(session.user.id, 10);
 
-    const settings = await prisma.notificationSettings.findUnique({
-        where: { userId: userId }
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { tgId: true },
     });
 
-    if (settings) {
-        await prisma.notificationSettings.update({
-            where: { userId: userId },
-            data: { notifyViaTg: true }
+    if (user?.tgId) {
+        await prisma.notificationSettings.upsert({
+            where: { userId },
+            update: { notifyViaTg: true },
+            create: { userId, notifyViaTg: true },
         });
-
         return NextResponse.json({ success: true });
     }
 
-    const token = crypto.randomBytes(32).toString('hex');
+    const token = crypto.randomBytes(32).toString("hex");
 
     await prisma.telegramLinkToken.create({
         data: {
-            userId: userId,
-            token: token,
+            userId,
+            token,
             expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-        }
+        },
     });
 
     const botUsername = await getBotUsername();
