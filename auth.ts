@@ -9,9 +9,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        email: {
-          label: "Email",
-          type: "email",
+        username: {
+            label: 'Логин',
+            type: 'text'
         },
         password: {
           label: "Пароль",
@@ -19,39 +19,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         },
       },
       async authorize(credentials) {
-        if (!credentials?.email || typeof credentials.email !== "string") {
-          return null;
-        }
+          if (!credentials?.username || !credentials?.password) return null;
 
-        if (
-          !credentials?.password ||
-          typeof credentials.password !== "string"
-        ) {
-          return null;
-        }
+          const user = await prisma.user.findUnique({
+              where: { username: credentials.username as string }
+          });
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        });
+          if (!user || !user.passwordHash) return null;
 
-        if (!user?.passwordHash) {
-          return null;
-        }
+          const isValid = await bcrypt.compare(credentials.password as string, user.passwordHash);
+          if (!isValid) return null;
 
-        const valid = await bcrypt.compare(
-          credentials.password,
-          user.passwordHash,
-        );
-
-        if (!valid) {
-          return null;
-        }
-
-        return {
-          id: user.id.toString(),
-          email: user.email,
-          name: user.username,
-        };
+          return {
+              id: user.id.toString(),
+              name: user.username,
+          };
       },
     }),
   ],
@@ -67,7 +49,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
         token.role = userRole?.role || "member";
         token.id = user.id;
-        token.email = user.email;
+        //token.email = user.email;
         token.name = user.name;
       }
 
@@ -76,7 +58,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        session.user.email = token.email as string;
+        //session.user.email = token.email as string;
         session.user.username = token.name;
         session.user.role = token.role as string;
       }

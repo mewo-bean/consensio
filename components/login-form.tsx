@@ -30,12 +30,12 @@ export function LoginForm({
           <h1 className="text-2xl font-bold">Войти в аккаунт</h1>
         </div>
         <Field>
-          <FieldLabel htmlFor="email">Почта</FieldLabel>
+          <FieldLabel htmlFor="email">Username</FieldLabel>
           <Input
-            id="email"
-            type="email"
-            name="email"
-            placeholder="m@example.com"
+            id="username"
+            type="username"
+            name="username"
+            placeholder="ivanchik"
             defaultValue={state?.fields?.email}
             required
             className="bg-background"
@@ -44,12 +44,12 @@ export function LoginForm({
         <Field>
           <div className="flex items-center">
             <FieldLabel htmlFor="password">Пароль</FieldLabel>
-            <a
-              href="/forgot"
-              className="ml-auto text-sm underline-offset-4 hover:underline"
-            >
-              Забыли пароль?
-            </a>
+            {/*<a*/}
+            {/*  href="/forgot"*/}
+            {/*  className="ml-auto text-sm underline-offset-4 hover:underline"*/}
+            {/*>*/}
+            {/*  Забыли пароль?*/}
+            {/*</a>*/}
           </div>
           <div className="relative">
             <Input

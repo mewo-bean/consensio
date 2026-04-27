@@ -10,17 +10,32 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import React, {useActionState} from "react";
+import React, {useActionState, useState, useMemo} from "react";
 import {signupAction, SignupState} from "@/app/signup/actions";
 import {ErrorMessage} from "@/components/errorMessage";
-import { Eye, EyeOff } from "lucide-react"
+import {Check, Circle, Eye, EyeOff } from "lucide-react"
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
-  const [state, formAction] = useActionState<SignupState | null, FormData>(signupAction,null)
+  const [state, formAction, isPending] = useActionState<SignupState | null, FormData>(signupAction,null)
   const [showPassword, setShowPassword] = React.useState(false);
+  const [password, setPassword] = useState("")
+
+  const checks = useMemo(() => ({
+    length: password.length >= 8,
+    hasUpper: /[A-Z]/.test(password),
+    hasLower: /[a-z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+  }), [password])
+
+  const Requirement = ({ met, text }: { met: boolean, text: string }) => (
+      <div className={cn("flex items-center gap-2 text-xs transition-colors", met ? "text-primary" : "text-muted-foreground")}>
+        {met ? <Check className="size-3" /> : <Circle className="size-3 opacity-50" />}
+        <span>{text}</span>
+      </div>
+  )
 
   return (
     <form action={formAction} className={cn("flex flex-col gap-6", className)} {...props}>
@@ -64,18 +79,18 @@ export function SignupForm({
             className="bg-background"
           />
         </Field>
-        <Field>
-          <FieldLabel htmlFor="email">Почта</FieldLabel>
-          <Input
-            id="email"
-            type="email"
-            name="email"
-            placeholder="m@example.com"
-            defaultValue={state?.fields?.email}
-            required
-            className="bg-background"
-          />
-        </Field>
+        {/*<Field>*/}
+        {/*  <FieldLabel htmlFor="email">Почта</FieldLabel>*/}
+        {/*  <Input*/}
+        {/*    id="email"*/}
+        {/*    type="email"*/}
+        {/*    name="email"*/}
+        {/*    placeholder="m@example.com"*/}
+        {/*    defaultValue={state?.fields?.email}*/}
+        {/*    required*/}
+        {/*    className="bg-background"*/}
+        {/*  />*/}
+        {/*</Field>*/}
         <Field>
           <FieldLabel htmlFor="password">Пароль</FieldLabel>
           <div className="relative">
@@ -85,6 +100,8 @@ export function SignupForm({
                 name="password"
                 required
                 className="bg-background pr-10"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
             />
             <button
                 type="button"
@@ -95,7 +112,13 @@ export function SignupForm({
               {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
           </div>
-          <FieldDescription>Пароль должен быть 8 символов, с латинской буквой и одним из !@#$%^&*()</FieldDescription>
+          {/* БЛОК С ГАЛОЧКАМИ */}
+          <div className="grid grid-cols-2 gap-2 p-3 rounded-lg">
+            <Requirement met={checks.length} text="8+ символов" />
+            <Requirement met={checks.hasNumber} text="Цифра" />
+            <Requirement met={checks.hasUpper} text="Заглавная латинская буква" />
+            <Requirement met={checks.hasLower} text="Строчная латинская буква" />
+          </div>
           <FieldDescription>
             {
                 state?.error && <ErrorMessage message={state.error}></ErrorMessage>
@@ -103,7 +126,8 @@ export function SignupForm({
           </FieldDescription>
         </Field>
         <Field>
-          <Button type="submit">Создать</Button>
+          <Button type="submit"
+                  disabled={isPending || !Object.values(checks).every(Boolean)}>Создать</Button>
         </Field>
         <Field>
           <FieldDescription className="px-6 text-center">

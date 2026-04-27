@@ -27,10 +27,10 @@ export default async function ProfilePage() {
                             <h1 className="text-xl font-semibold">
                                 {user.username || "Пользователь"}
                             </h1>
-                            <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                <Mail className="h-3 w-3" />
-                                {user.email}
-                            </p>
+                            {/*<p className="text-sm text-muted-foreground flex items-center gap-1">*/}
+                            {/*    <Mail className="h-3 w-3" />*/}
+                            {/*    {user.email}*/}
+                            {/*</p>*/}
                         </div>
                     </div>
                 </CardContent>
