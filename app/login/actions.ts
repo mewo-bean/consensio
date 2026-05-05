@@ -16,17 +16,17 @@ export async function loginAction(
     _prevState: LoginState | null,
     formData: FormData
 ): Promise<LoginState> {
-    const username = String(formData.get('username')).trim();
+    const identifier = String(formData.get('identifier')).trim();
     const password = String(formData.get('password')).trim()
 
-    if (!username || !password) {
-        return {error: 'Все поля должны быть заполнены', fields: { username: username }}
+    if (!identifier || !password) {
+        return {error: 'Все поля должны быть заполнены', fields: { username: identifier }}
     }
 
     try {
-        console.log('username- ', username, password)
+        console.log('username- ', identifier, password)
         await signIn('credentials', {
-            username: username,
+            identifier,
             password,
             redirectTo: "/"
         })
@@ -35,10 +35,10 @@ export async function loginAction(
     } catch (error) {
         if (error instanceof AuthError) {
             if (error.type === 'CredentialsSignin') {
-                return {error: 'Неверный username или пароль', fields: { username: username }}
+                return {error: 'Неверный username/почта или пароль', fields: { username: identifier }}
             }
 
-            return {error: 'Ошибка авторизации', fields: { username: username}}
+            return {error: 'Ошибка авторизации', fields: { username: identifier}}
         }
 
         throw error

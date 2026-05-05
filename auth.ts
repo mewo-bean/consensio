@@ -9,8 +9,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       credentials: {
-        username: {
-            label: 'Логин',
+        identifier: {
+            label: 'Логин или пароль',
             type: 'text'
         },
         password: {
@@ -19,10 +19,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         },
       },
       async authorize(credentials) {
-          if (!credentials?.username || !credentials?.password) return null;
+          const identifier = credentials?.identifier as string;
+          const password = credentials?.password as string;
 
-          const user = await prisma.user.findUnique({
-              where: { username: credentials.username as string }
+          if (!identifier || !password) return null;
+
+          const user = await prisma.user.findFirst({
+              where: {
+                  OR: [
+                      { username: identifier },
+                      { email: identifier }
+                  ]
+              }
           });
 
           if (!user || !user.passwordHash) return null;

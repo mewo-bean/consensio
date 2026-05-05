@@ -30,12 +30,12 @@ export function LoginForm({
           <h1 className="text-2xl font-bold">Войти в аккаунт</h1>
         </div>
         <Field>
-          <FieldLabel htmlFor="email">Username</FieldLabel>
+          <FieldLabel htmlFor="email">Username или почта (если регистрировались с ней)</FieldLabel>
           <Input
             id="username"
             type="username"
-            name="username"
-            placeholder="ivanchik"
+            name="identifier"
+            placeholder="ivanchik/ivan@mail.ru"
             defaultValue={state?.fields?.email}
             required
             className="bg-background"
